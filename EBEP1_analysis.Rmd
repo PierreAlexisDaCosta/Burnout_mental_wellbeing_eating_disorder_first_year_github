@@ -1,0 +1,3628 @@
+---
+title: "EBEP1"
+author: "Pierre-Alexis Da Costa"
+date: "2025-06-01"
+output:
+  html_document: default
+  pdf_document: default
+editor_options:
+  chunk_output_type: console
+---
+
+```{r package and function}
+library(readxl)
+library(writexl)
+library(tidyr)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(gtsummary)
+library(ggforce)
+library(stringr)
+library(UpSetR)
+library(forcats)
+library(broom)
+
+library(scales)  # pour percent_format()
+library(ggtext)
+library(GGally)
+
+library(UpSetR)
+library(RColorBrewer)
+library(purrr)
+library(psych)
+library(ggplot2)
+library(ggpubr)
+library(reshape2)
+library(patchwork)
+library(ggraph)
+library(igraph)
+
+my_theme <- 
+  theme( 
+  panel.background = element_rect(fill = "white"),
+  axis.line = element_line(color = "grey90"),
+  legend.position = "top",
+  legend.title = element_blank(),
+  strip.background = element_rect(fill = "grey30"),
+  strip.text = element_text(colour = "white"),
+  text = element_text(face = "bold")
+)
+
+
+```
+
+## 1. Description
+
+```{r data wrangling}
+Correspondance_EBEP1_2025 <-
+  readxl::read_excel("./Raw_data/Correspondance_EBEP1_2025.xlsx")
+
+
+Recode_of_every_possible_answer <-
+  readxl::read_excel("./Raw_data/Recode_of_every_possible_answer.xlsx")
+
+Reponse_EBE_P1_pre_filtered <-
+  readxl::read_excel("./Raw_data/Survey_result.xlsx")
+
+Reponse_EBE_P1 <- 
+  Reponse_EBE_P1_pre_filtered[, (colnames(Reponse_EBE_P1_pre_filtered) %in% 
+                                   Correspondance_EBEP1_2025$Nom)]
+
+# Créer un vecteur de correspondance entre les noms et les codes
+correspondance <- setNames(Correspondance_EBEP1_2025$Code, Correspondance_EBEP1_2025$Nom)
+
+# Copier le dataframe d'origine
+Reponse_EBE_P1_recode <- Reponse_EBE_P1
+
+# Remplacer les noms de colonnes si correspondance trouvée
+colnames(Reponse_EBE_P1_recode) <- ifelse(
+  colnames(Reponse_EBE_P1_recode) %in% names(correspondance),
+  correspondance[colnames(Reponse_EBE_P1_recode)],
+  colnames(Reponse_EBE_P1_recode)  # laisser inchangé sinon
+)
+
+
+# Fonction de recodage d'une colonne
+recode_2024 <- function(x) {
+  x <- as.character(x)  # au cas où ce serait numérique
+  x[x == "2024.0"] <- "2024"
+  return(x)
+}
+
+# Appliquer à tout le dataframe (par exemple Reponse_EBE_P1)
+Reponse_EBE_P1_recode <- as.data.frame(lapply(Reponse_EBE_P1_recode, recode_2024), stringsAsFactors = FALSE)
+
+# # Step 1: Get all unique answers from Reponse_EBE_P1
+all_answers <- unique(unlist(Reponse_EBE_P1))
+# 
+# # Step 2: Check which answers are NOT in the recode list
+unknown_answers <- setdiff(all_answers, Recode_of_every_possible_answer$reponse_possible)
+# 
+if(length(unknown_answers) > 0) {
+  cat("These answers have no recoding (not found in recode list):\n")
+  print(unknown_answers)
+} else {
+  cat("All answers found in the recode list. Proceeding with recoding...\n")
+}
+
+# Step 3: Create a named vector for recoding for fast lookup
+recode_vector <- 
+  setNames(Recode_of_every_possible_answer$translation, 
+           Recode_of_every_possible_answer$reponse_possible)
+
+# Step 4: Replace answers by translation in the whole dataframe
+# This will replace only known answers; unknown will become NA or stay same if you prefer
+
+Reponse_EBE_P1_final <- as.data.frame(
+  lapply(Reponse_EBE_P1_recode, function(col) {
+    # Replace values by recode_vector if found, otherwise keep original or NA
+    recoded_col <- recode_vector[as.character(col)]
+    # Optional: keep original if not found
+    recoded_col[is.na(recoded_col)] <- as.character(col)[is.na(recoded_col)]
+    return(recoded_col)
+  }),
+  stringsAsFactors = FALSE
+)
+
+Reponse_EBE_P1_final <- as.data.frame(lapply(Reponse_EBE_P1_final, recode_2024), stringsAsFactors = FALSE) %>%
+  dplyr::rename(Financial_situation_concerns = Final_situation_concerns)
+
+Reponse_EBE_P1_final %>%
+  writexl::write_xlsx("./Preprocessed_data/Reponse_EBE_P1_final.xlsx")
+```
+
+```{r calcul score HAD, fig.width=10, fig.height=10}
+HAD_correspondance <-
+  Correspondance_EBEP1_2025 %>%
+  filter(Echelle == "HAD") 
+
+HAD_correspondance$Nom_anglais <-
+  str_remove_all(HAD_correspondance$Nom_anglais, "\\[|\\]")
+HAD_correspondance$Nom_anglais <-
+  str_remove_all(HAD_correspondance$Nom_anglais, "HAD ")
+HAD_correspondance$Nom_anglais <-
+  str_replace_all(HAD_correspondance$Nom_anglais, '"wound up"', 'wound up')
+
+
+HAD_Reponse_EBE_P1_final <-
+  Reponse_EBE_P1_final %>%
+  select(contains("HAD"))
+
+# Score Calcul ####
+HAD_Reponse_EBE_P1_final_for_score <- HAD_Reponse_EBE_P1_final
+
+
+# Plot HAD ####
+# Récupérer les noms actuels des colonnes
+old_names <- colnames(HAD_Reponse_EBE_P1_final)
+
+# Créer un vecteur de nouveaux noms, en cherchant correspondance dans HAD_correspondance
+new_names <- sapply(old_names, function(x) {
+  idx <- which(HAD_correspondance$Code == x)
+  if(length(idx) == 1) {
+    return(HAD_correspondance$Nom_anglais[idx])
+  } else {
+    # Si pas de correspondance, on garde le nom original
+    return(x)
+  }
+})
+
+# Appliquer les nouveaux noms
+colnames(HAD_Reponse_EBE_P1_final) <- new_names
+
+
+HAD_Reponse_EBE_P1_final_long <- HAD_Reponse_EBE_P1_final %>%
+    pivot_longer(
+      cols = everything(),
+      names_to = "Question",
+      values_to = "Response"
+    )
+  
+HAD_Reponse_EBE_P1_final_summary <- HAD_Reponse_EBE_P1_final_long %>%
+    group_by(Question, Response) %>%
+    summarise(n = n(), .groups = "drop") %>%
+    group_by(Question) %>%
+    mutate(percent = n / sum(n))
+  
+# Forcer l'ordre des modalités
+HAD_Reponse_EBE_P1_final_summary <- HAD_Reponse_EBE_P1_final_summary %>%
+  mutate(Response = factor(Response, levels = c("3 Most of the time", "2 Often", "1 From time to time", "0 Never")))
+
+HAD_Reponse_EBE_P1_final_summary$Response %>% levels()
+# Calculer la somme de 0 et 1 par question pour mettre en gras si > 50%
+bold_questions <- HAD_Reponse_EBE_P1_final_summary %>%
+  filter(Response %in% c("0 Never", "1 From time to time")) %>%
+  group_by(Question) %>%
+  summarise(sum_percent = sum(percent)) %>%
+  filter(sum_percent > 0.5) %>%
+  pull(Question)
+
+# Ajouter une colonne pour label en gras ou non
+HAD_Reponse_EBE_P1_final_summary <- HAD_Reponse_EBE_P1_final_summary %>%
+  mutate(bold_label = ifelse(Question %in% bold_questions, TRUE, FALSE))
+
+# Préparer les labels pour afficher les % dans les barres (en % arrondi)
+HAD_Reponse_EBE_P1_final_summary <- HAD_Reponse_EBE_P1_final_summary %>%
+  mutate(percent_label = ifelse(percent > 0.02, paste0(round(percent*100), "%"), ""))  # n'affiche que si > 2%
+
+
+
+# Define a gradient palette from light to dark blue (for example)
+my_palette_HAD <- scales::gradient_n_pal(c("lightblue", "dodgerblue", "blue", "darkblue"))
+
+# Generate 4 colors evenly spaced on the gradient
+colors_HAD <- my_palette_HAD(seq(0, 1, length.out = 4))
+
+
+ggplot(HAD_Reponse_EBE_P1_final_summary, aes(x = Question, y = percent, fill = Response)) +
+  geom_bar(stat = "identity", position = "fill") +
+  geom_text(aes(label = percent_label),
+            position = position_fill(vjust = 0.5),
+            color = "white",
+            size = 3) +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_manual(values = colors_HAD) +
+  labs(title = "Distribution of HAD responses by question",
+       x = "Question",
+       y = "Percentage",
+       fill = "Response") +
+  theme_minimal() 
+
+```
+Due to a technical error, we cannot compute a score for HAD.
+
+```{r calcul score Warwick Edinburg, fig.width=10, fig.height=10}
+# Filtrer la correspondance pour l'échelle Warwick-Edinburgh
+Warwick_correspondance <- Correspondance_EBEP1_2025 %>%
+  filter(Echelle == "Warwick_Edinburgh")
+
+# Sélectionner uniquement les colonnes liées à Warwick dans les réponses
+WE_Reponse_EBE_P1_final <- Reponse_EBE_P1_final %>%
+  select(contains("Warwick_Edinburgh"))
+
+
+WE_Reponse_EBE_P1_final_for_score <- WE_Reponse_EBE_P1_final %>%
+  mutate(across(everything(), ~ {
+    # Retirer tous les caractères sauf chiffres, signes négatifs et points (virgules selon besoin)
+    cleaned <- str_replace_all(as.character(.), "[^0-9.-]", "")
+    # Convertir en numérique
+    as.numeric(cleaned)
+  }))
+
+
+WE_Reponse_EBE_P1_final_score <-
+  WE_Reponse_EBE_P1_final_for_score %>% rowSums() %>% as.data.frame()
+
+colnames(WE_Reponse_EBE_P1_final_score) <- "Warwick_Edinburg_total"
+
+# Renommage des colonnes avec noms anglais (si disponibles)
+old_names <- colnames(WE_Reponse_EBE_P1_final)
+
+new_names <- sapply(old_names, function(x) {
+  idx <- which(Warwick_correspondance$Code == x)
+  if(length(idx) == 1) {
+    return(Warwick_correspondance$Nom_anglais[idx])
+  } else {
+    return(x)
+  }
+})
+
+colnames(WE_Reponse_EBE_P1_final) <- new_names
+
+# Passage en format long
+WE_Reponse_EBE_P1_final_long <- WE_Reponse_EBE_P1_final %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "Question",
+    values_to = "Response"
+  )
+
+# Résumé des réponses
+WE_Reponse_EBE_P1_final_summary <- WE_Reponse_EBE_P1_final_long %>%
+  group_by(Question, Response) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(Question) %>%
+  mutate(percent = n / sum(n))
+
+
+# Définir l’ordre des modalités de réponse typiques WEMWBS (à adapter selon ton codage réel)
+
+
+WE_Reponse_EBE_P1_final_summary <- WE_Reponse_EBE_P1_final_summary %>%
+  mutate(Response = factor(Response,
+                           levels = c("5 All the time", "4 Often", "3 Sometimes", "2 Rarely", "1 never")))
+
+
+WE_Reponse_EBE_P1_final_summary <- WE_Reponse_EBE_P1_final_summary %>%
+  mutate(bold_label = ifelse(Question %in% bold_questions, TRUE, FALSE),
+         percent_label = ifelse(percent > 0.02, paste0(round(percent*100), "%"), ""))
+
+# Palette de couleurs pour WEMWBS
+my_palette_WE <- scales::gradient_n_pal(c("lightgreen", "mediumseagreen", "green", "seagreen", "darkgreen"))
+colors_WE <- my_palette_WE(seq(0, 1, length.out = 5))
+
+# Visualisation
+WEMWBS_answer <-
+  ggplot(WE_Reponse_EBE_P1_final_summary, aes(x = Question, y = percent, fill = Response)) +
+  geom_bar(stat = "identity", position = "fill") +
+  geom_text(aes(label = percent_label),
+            position = position_fill(vjust = 0.5),
+            color = "white",
+            size = 3) +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_manual(values = colors_WE) +
+  labs(title = "Distribution of WEMWBS responses by question",
+       x = "Question",
+       y = "Percentage",
+       fill = "Response") +
+  theme_minimal()
+
+WEMWBS_answer
+
+
+WE_Reponse_EBE_P1_final_foralpha_cronbach <- as.data.frame(
+  lapply(WE_Reponse_EBE_P1_final, function(x) as.numeric(gsub("[^0-9]", "", x)))
+)
+alpha_result_WE <- psych::alpha(WE_Reponse_EBE_P1_final_foralpha_cronbach)
+alpha_result_WE$total
+```
+
+
+
+```{r calcul score SCOFF, fig.width=7, fig.height=4}
+# 1. Filtrer la correspondance SCOFF
+SCOFF_correspondance <- Correspondance_EBEP1_2025 %>%
+  filter(Echelle == "SCOFF")
+
+# 2. Sélectionner les colonnes SCOFF dans les réponses
+SCOFF_Reponse_EBE_P1_final <- Reponse_EBE_P1_final %>%
+  select(contains("SCOFF"))
+
+# 3. Nettoyage et transformation en score binaire (0/1)
+SCOFF_Reponse_EBE_P1_final_for_score <- SCOFF_Reponse_EBE_P1_final %>%
+  mutate(across(everything(), ~ case_when(
+    str_to_lower(.) %in% c("yes", "oui") ~ 1,
+    str_to_lower(.) %in% c("no", "non") ~ 0,
+    TRUE ~ NA_real_  # ou NA_integer_ si tu veux des entiers
+  )))
+
+# 4. Calcul du score total par individu
+SCOFF_Reponse_EBE_P1_final_score <- SCOFF_Reponse_EBE_P1_final_for_score %>%
+  rowSums(na.rm = TRUE) %>%
+  as.data.frame()
+colnames(SCOFF_Reponse_EBE_P1_final_score) <- "SCOFF_total"
+
+# 5. Application du cutoff clinique
+SCOFF_Reponse_EBE_P1_final_score <- SCOFF_Reponse_EBE_P1_final_score %>%
+  mutate(SCOFF_sup_2_Eating_dirsorder_risk = ifelse(SCOFF_total >= 2, "Risk_SCOFF", "No_Risk"))
+
+# Barplot
+
+# Préparation du résumé SCOFF
+SCOFF_summary <- SCOFF_Reponse_EBE_P1_final_score %>%
+  group_by(SCOFF_total) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  mutate(percent = n / sum(n),
+         SCOFF_total = factor(SCOFF_total, levels = sort(unique(SCOFF_total))),
+         SCOFF_num = as.numeric(as.character(SCOFF_total)) # Conversion en numérique
+  ) %>%
+  mutate(SCOFF_total = factor(SCOFF_total, levels = as.character(0:5)))
+
+# Calculer la hauteur cumulée au seuil SCOFF_num == 2
+cutoff_y <- sum(SCOFF_summary$percent[SCOFF_summary$SCOFF_num < 2])
+
+SCOFF_score_ditrib <-
+  ggplot(SCOFF_summary, aes(x = 1, y = percent, fill = SCOFF_num)) +
+  geom_bar(stat = "identity", width = 0.7, position = "stack") +
+geom_text(aes(label = paste0(sprintf("%.0f", percent * 100), "%")),
+          position = position_stack(vjust = 0.5),
+          color = "white", size = 5) + 
+  scale_fill_gradientn(
+    colors = c("#FFC0CB", "#DA70D6", "#8A2BE2"),  # dégradé rose -> violet
+    breaks = 0:5,
+    labels = 0:5,
+    limits = c(0,5),
+    name = "SCOFF Total Score"
+  ) +
+  # Ligne horizontale à la hauteur du cutoff
+  geom_hline(yintercept = cutoff_y, linetype = "dashed", color = "black", linewidth = 1) +
+  
+  # Annotation "Not at risk" à gauche sous la ligne
+  annotate("text", x = 0.7, y = cutoff_y / 2, label = "Not at risk\n(49.51%)", angle = 0, size = 5, hjust = 1) +
+  
+  # Annotation "At risk" à gauche au-dessus de la ligne
+  annotate("text", x = 0.7, y = cutoff_y + (1.25 - cutoff_y) / 2, label = "At risk of Eating Disorder\n      (50.49%)           ", angle = 0, size = 5, hjust = 1) +
+  
+  coord_flip() +
+    scale_y_continuous(labels = scales::percent_format(), expand = c(0, 0)) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    x = "",
+    y = ""
+  ) + my_theme +
+  theme(
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 11),
+    axis.line = element_blank()
+  ) 
+  
+
+SCOFF_score_ditrib
+
+ggsave("./Result/Figures/SCOFF.png", SCOFF_score_ditrib, width = 10, height = 6)
+
+
+
+alpha_result_SCOFF <- psych::alpha(SCOFF_Reponse_EBE_P1_final_for_score)
+alpha_result_SCOFF$total
+
+
+```
+  
+```{r calcul score SCOFF PArt2, fig.width=8, fig.height=6}
+
+# 6. Renommage des colonnes avec noms anglais (si disponibles)
+old_names <- colnames(SCOFF_Reponse_EBE_P1_final)
+new_names <- sapply(old_names, function(x) {
+  idx <- which(SCOFF_correspondance$Code == x)
+  if(length(idx) == 1) {
+    return(SCOFF_correspondance$Nom_anglais[idx])
+  } else {
+    return(x)
+  }
+})
+colnames(SCOFF_Reponse_EBE_P1_final) <- new_names
+
+# 7. Passage en format long
+SCOFF_Reponse_EBE_P1_final_long <- SCOFF_Reponse_EBE_P1_final %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "Question",
+    values_to = "Response"
+  )
+
+# 8. Résumé des réponses
+SCOFF_Reponse_EBE_P1_final_summary <- SCOFF_Reponse_EBE_P1_final_long %>%
+  group_by(Question, Response) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(Question) %>%
+  mutate(percent = n / sum(n))
+
+# 9. Forcer l’ordre (0 = non, 1 = oui)
+SCOFF_Reponse_EBE_P1_final_summary <- SCOFF_Reponse_EBE_P1_final_summary %>%
+  mutate(Response = factor(Response, levels = c("Yes", "No"), labels = c("Yes", "No")))
+
+# 10. Préparation des étiquettes
+SCOFF_Reponse_EBE_P1_final_summary <- SCOFF_Reponse_EBE_P1_final_summary %>%
+  mutate(percent_label = ifelse(percent > 0.02, paste0(round(percent*100), "%"), ""))
+
+# 11. Palette et graphe
+colors_SCOFF <- c("darkred", "darkgreen")
+
+SCOFF_answer <-
+  ggplot(SCOFF_Reponse_EBE_P1_final_summary, aes(x = Question, y = percent, fill = Response)) +
+  geom_bar(stat = "identity", position = "fill") +
+  geom_text(aes(label = percent_label),
+            position = position_fill(vjust = 0.5),
+            color = "white",
+            size = 3) +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_manual(values = colors_SCOFF) +
+  labs(title = "Distribution of SCOFF responses by question",
+       x = "Question",
+       y = "Percentage",
+       fill = "Answer") +
+  theme_minimal()
+
+SCOFF_answer
+
+```
+
+
+```{r calcul score French MBI SS, fig.width=8, fig.height=4}
+# Filtrer la correspondance pour MBI-SS
+MBI_correspondance <- Correspondance_EBEP1_2025 %>%
+  filter(Echelle == "French_MBI_SS")
+
+# Sélectionner uniquement les colonnes MBI dans les réponses
+MBI_Reponse_EBE_P1_final <- Reponse_EBE_P1_final %>%
+  select(contains("French_MBI_SS"))
+
+MBI_Reponse_EBE_P1_final_for_score <- MBI_Reponse_EBE_P1_final %>%
+  mutate(across(everything(), ~ {
+    cleaned <- str_replace_all(as.character(.), "[^0-9.-]", "")
+    as.numeric(cleaned)
+  }))
+
+MBI_correspondance$Nom_anglais <- str_remove_all(MBI_correspondance$Nom_anglais, "\\[MBI-SS\\] ")
+
+
+# #Epuismeent Emotionnel 
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_emotionally_drained
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_feeling_exhausted_day_end
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_feeling_exhausted_studies
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_tired_morning_university
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_studying_stressful
+# 
+# 
+# #Cynisme
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_less_interest_studies
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_less_enthusiastic_studies
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_more_cynical_about_studies
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_doubt_study_meaning
+# 
+# #Efficacité académique
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_problem_solving_effective
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_effective_contribution
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_consider_good_student
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_learned_interesting_things
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_feeling_energized_goals
+# MBI_Reponse_EBE_P1_final_for_score$French_MBI_SS_feeling_effective_in_class
+
+MBI_Reponse_EBE_P1_final_for_score <- MBI_Reponse_EBE_P1_final_for_score %>%
+  mutate(
+    # Épuisement émotionnel : somme des 5 items
+    Emotional_Exhaustion = rowSums(select(., 
+                                          French_MBI_SS_emotionally_drained,
+                                          French_MBI_SS_feeling_exhausted_day_end,
+                                          French_MBI_SS_feeling_exhausted_studies,
+                                          French_MBI_SS_tired_morning_university,
+                                          French_MBI_SS_studying_stressful), na.rm = TRUE),
+    
+    # Cynisme : somme des 4 items
+    Cynicism = rowSums(select(., 
+                              French_MBI_SS_less_interest_studies,
+                              French_MBI_SS_less_enthusiastic_studies,
+                              French_MBI_SS_more_cynical_about_studies,
+                              French_MBI_SS_doubt_study_meaning), na.rm = TRUE),
+    
+    # Efficacité académique : somme des 6 items
+    Academic_Efficacy = rowSums(select(., 
+                                       French_MBI_SS_problem_solving_effective,
+                                       French_MBI_SS_effective_contribution,
+                                       French_MBI_SS_consider_good_student,
+                                       French_MBI_SS_learned_interesting_things,
+                                       French_MBI_SS_feeling_energized_goals,
+                                       French_MBI_SS_feeling_effective_in_class), na.rm = TRUE),
+    
+    
+    # Classification de la sévérité
+    Emotional_Exhaustion_Level = case_when(
+      Emotional_Exhaustion >= 5  & Emotional_Exhaustion <= 13 ~ "Low",
+      Emotional_Exhaustion >= 14 & Emotional_Exhaustion <= 22 ~ "Moderate",
+      Emotional_Exhaustion >= 23 & Emotional_Exhaustion <= 30 ~ "High",
+      TRUE ~ NA_character_
+    ),
+    
+    Cynicism_Level = case_when(
+      Cynicism >= 4  & Cynicism <= 10 ~ "Low",
+      Cynicism >= 11 & Cynicism <= 17 ~ "Moderate",
+      Cynicism >= 18 & Cynicism <= 24 ~ "High",
+      TRUE ~ NA_character_
+    ),
+    
+    Academic_Efficacy_Level = case_when(
+      Academic_Efficacy >= 6  & Academic_Efficacy <= 16 ~ "Low",
+      Academic_Efficacy >= 17 & Academic_Efficacy <= 26 ~ "Moderate",
+      Academic_Efficacy >= 27 & Academic_Efficacy <= 36 ~ "High",
+      TRUE ~ NA_character_
+    )
+  )
+MBI_Reponse_EBE_P1_final_score <-
+  MBI_Reponse_EBE_P1_final_for_score %>%
+  select(
+    # Scores globaux en premier
+    Emotional_Exhaustion,
+    Emotional_Exhaustion_Level,
+    
+    
+    # Items Épuisement Émotionnel
+    French_MBI_SS_emotionally_drained,
+    French_MBI_SS_feeling_exhausted_day_end,
+    French_MBI_SS_feeling_exhausted_studies,
+    French_MBI_SS_tired_morning_university,
+    French_MBI_SS_studying_stressful,
+    
+    Cynicism,
+    Cynicism_Level,
+    # Items Cynisme
+    French_MBI_SS_less_interest_studies,
+    French_MBI_SS_less_enthusiastic_studies,
+    French_MBI_SS_more_cynical_about_studies,
+    French_MBI_SS_doubt_study_meaning,
+    
+    Academic_Efficacy,
+    Academic_Efficacy_Level,
+    # Items Efficacité Académique
+    French_MBI_SS_problem_solving_effective,
+    French_MBI_SS_effective_contribution,
+    French_MBI_SS_consider_good_student,
+    French_MBI_SS_learned_interesting_things,
+    French_MBI_SS_feeling_energized_goals,
+    French_MBI_SS_feeling_effective_in_class,
+    
+    # Niveaux de sévérité
+    )
+
+# Plot Sévérité
+
+
+# Long format + regroupement pour les proportions
+MBI_levels_long <- MBI_Reponse_EBE_P1_final_score %>%
+  select(contains("Level")) %>%
+  pivot_longer(cols = everything(),
+               names_to = "Dimension",
+               values_to = "Severity_Level") %>%
+  mutate(
+    Dimension = case_when(
+      Dimension == "Emotional_Exhaustion_Level" ~ "Emotional Exhaustion",
+      Dimension == "Cynicism_Level" ~ "Cynicism",
+      Dimension == "Academic_Efficacy_Level" ~ "Academic Efficacy"
+    )
+  ) %>%
+  count(Dimension, Severity_Level) %>%
+  group_by(Dimension) %>%
+  mutate(
+    percent = n / sum(n),
+    Severity_Level = factor(Severity_Level, levels = c("Low", "Moderate", "High")),
+    Dimension = factor(Dimension, levels = c("Emotional Exhaustion", "Cynicism", "Academic Efficacy"))
+  )
+MBI_levels_long$Severity_Level <- factor(
+  MBI_levels_long$Severity_Level,
+  levels = c("High", "Moderate", "Low")
+)
+
+
+ggplot(MBI_levels_long, aes(x = Dimension, y = percent, fill = Severity_Level)) +
+  geom_bar(stat = "identity", position = "stack", width = 0.7) +
+  geom_text(aes(label = paste0(round(percent * 100), "%")),
+            position = position_stack(vjust = 0.5),
+            color = "white", size = 5) +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_manual(
+    values = c(
+      "Low" = "#91cf60",       # green
+      "Moderate" = "#fdae61",  # orange
+      "High" = "#d73027"     # red
+    ),
+    name = "Level"
+  ) +
+  labs(
+    title = "Burnout Severity Levels by Dimension",
+    x = "",
+    y = "Proportion"
+  ) +
+  my_theme
+
+```
+
+```{r calcul score French MBI SS Part2, fig.width=10, fig.height=10} 
+# Plot de tout  ####
+
+MBI_Reponse_EBE_P1_final_score_filtered <-
+  MBI_Reponse_EBE_P1_final %>%
+  dplyr::select(all_of(MBI_correspondance$Code))
+
+new_colnames <- 
+  MBI_correspondance$Nom_anglais[match(
+    colnames(MBI_Reponse_EBE_P1_final_score_filtered), 
+    MBI_correspondance$Code)]
+
+colnames(MBI_Reponse_EBE_P1_final_score_filtered) <- new_colnames
+
+
+
+# Step 1: Convert data to long format
+MBI_long <- MBI_Reponse_EBE_P1_final_score_filtered %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "Question",
+    values_to = "Response"
+  )
+
+# Step 2: Summarize responses per question
+MBI_summary <- MBI_long %>%
+  group_by(Question, Response) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(Question) %>%
+  mutate(percent = n / sum(n))
+
+# Step 3: Define the factor levels of responses in French validated MBI-SS
+# Adapt these levels according to your real coding (example given below)
+response_levels <- c(
+  "6 Always",
+  "5.0", 
+  "4.0", 
+  "3.0", 
+  "2.0", 
+  "1 Never"
+)
+
+MBI_summary <- MBI_summary %>%
+  mutate(Response = factor(Response, levels = response_levels))
+
+# Optional: add labels if needed, for example, highlight specific questions
+# (You can define a vector `bold_questions` with question names to highlight)
+bold_questions <- c() # fill with your important question names if any
+
+MBI_summary <- MBI_summary %>%
+  mutate(bold_label = ifelse(Question %in% bold_questions, TRUE, FALSE),
+         percent_label = ifelse(percent > 0.02, paste0(round(percent*100), "%"), ""))
+
+# Step 4: Define a color palette for your responses (7 levels)
+my_palette_MBI <- scales::gradient_n_pal(c(
+  "lightblue", "skyblue", "deepskyblue", 
+  "dodgerblue", "blue", "darkblue", "navy"
+))
+colors_MBI <- my_palette_MBI(seq(0, 1, length.out = length(response_levels)))
+
+# Step 5: Plot
+French_MBISS_answer <-
+  ggplot(MBI_summary, aes(x = Question, y = percent, fill = Response)) +
+  geom_bar(stat = "identity", position = "fill") +
+  geom_text(aes(label = percent_label),
+            position = position_fill(vjust = 0.5),
+            color = "white",
+            size = 3) +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_manual(values = colors_MBI) +
+  labs(title = "Distribution of French MBI-SS responses by question",
+       x = "Question",
+       y = "Percentage",
+       fill = "Response") +
+  theme_minimal()
+
+French_MBISS_answer
+
+MBI_Reponse_EBE_P1_final_for_alpha <- as.data.frame(
+  lapply(MBI_Reponse_EBE_P1_final, function(x) {
+    # Remove letters, keep numbers and decimal points
+    x_clean <- gsub("[^0-9\\.]", "", x)  
+    # Convert to numeric
+    as.numeric(x_clean)
+  })
+) 
+
+MBI_Reponse_EBE_P1_final_for_alpha_reverseAEcoded <- 
+  MBI_Reponse_EBE_P1_final_for_alpha%>%
+  mutate(across(all_of(c(
+    "French_MBI_SS_problem_solving_effective",
+    "French_MBI_SS_effective_contribution",
+    "French_MBI_SS_consider_good_student",
+    "French_MBI_SS_learned_interesting_things",
+    "French_MBI_SS_feeling_energized_goals",
+    "French_MBI_SS_feeling_effective_in_class"
+  )), ~ 7 - .))
+
+alpha_MBISS <-
+  psych::alpha(MBI_Reponse_EBE_P1_final_for_alpha_reverseAEcoded) 
+alpha_MBISS$total
+
+MBI_Reponse_EBE_P1_final_for_alpha_CY <-
+  MBI_Reponse_EBE_P1_final_for_alpha %>%
+  dplyr::select( French_MBI_SS_less_interest_studies,
+                              French_MBI_SS_less_enthusiastic_studies,
+                              French_MBI_SS_more_cynical_about_studies,
+                              French_MBI_SS_doubt_study_meaning)
+alpha_CY <-
+  psych::alpha(MBI_Reponse_EBE_P1_final_for_alpha_CY)
+alpha_CY$total
+
+
+MBI_Reponse_EBE_P1_final_for_alpha_EE <-
+  MBI_Reponse_EBE_P1_final_for_alpha %>%
+  dplyr::select( French_MBI_SS_emotionally_drained,
+                                          French_MBI_SS_feeling_exhausted_day_end,
+                                          French_MBI_SS_feeling_exhausted_studies,
+                                          French_MBI_SS_tired_morning_university,
+                                          French_MBI_SS_studying_stressful)
+alpha_EE <-
+  psych::alpha(MBI_Reponse_EBE_P1_final_for_alpha_EE)
+alpha_EE$total
+
+
+MBI_Reponse_EBE_P1_final_for_alpha_AE <-
+  MBI_Reponse_EBE_P1_final_for_alpha %>%
+  dplyr::select(c(
+    "French_MBI_SS_problem_solving_effective",
+    "French_MBI_SS_effective_contribution",
+    "French_MBI_SS_consider_good_student",
+    "French_MBI_SS_learned_interesting_things",
+    "French_MBI_SS_feeling_energized_goals",
+    "French_MBI_SS_feeling_effective_in_class"
+  ))
+  
+alpha_AE <-
+  psych::alpha(MBI_Reponse_EBE_P1_final_for_alpha_AE) 
+alpha_AE$total
+
+
+
+```
+
+
+```{r All Scores, fig.width=8.5, fig.height=8.5}
+library(ggplot2)
+library(patchwork)
+
+# Assume these are your plots
+p2 <- French_MBISS_answer + theme(axis.title = element_blank(), axis.ticks = element_blank()) + ggtitle(NULL)
+
+p3 <- SCOFF_answer  + theme(axis.title = element_blank(), axis.ticks = element_blank()) + ggtitle(NULL)
+p1 <- WEMWBS_answer  + theme(axis.title = element_blank(), axis.ticks = element_blank()) + ggtitle(NULL)
+
+# Combine vertically
+combined_plot <- p1 / p2 / p3 + 
+  plot_layout(heights = c(14, 15, 5))
+
+ggsave("./Result/Figures/FigS2.png", combined_plot, width = 12, height = 10, dpi = 300)
+
+
+All_scores <-
+  cbind((MBI_Reponse_EBE_P1_final_score %>%
+          dplyr::select(-contains("French"))), 
+       (SCOFF_Reponse_EBE_P1_final_score),
+       WE_Reponse_EBE_P1_final_score)
+
+
+# Calculer statistiques + nombre et % < 40
+stats_WE <- All_scores %>%
+  summarise(
+    min = min(Warwick_Edinburg_total, na.rm = TRUE),
+    max = max(Warwick_Edinburg_total, na.rm = TRUE),
+    median = median(Warwick_Edinburg_total, na.rm = TRUE),
+    mean = mean(Warwick_Edinburg_total, na.rm = TRUE),
+    sd = sd(Warwick_Edinburg_total, na.rm = TRUE),
+   Q1 = quantile(Warwick_Edinburg_total, 0.25, na.rm = TRUE),
+    Q3 = quantile(Warwick_Edinburg_total, 0.75, na.rm = TRUE),    n_below_40 = sum(Warwick_Edinburg_total < 40, na.rm = TRUE),
+    total = n()
+  ) %>%
+  mutate(pct_below_40 = round(100 * n_below_40 / total, 2),
+    iqr = paste0("[", round(Q1, 2), "; ", round(Q3, 2), "]") 
+    )
+
+# Construire le titre avec IQR
+title_text_WE <- paste0(
+  "Min: ", stats_WE$min, " | Max: ", stats_WE$max, " | Median: ", round(stats_WE$median, 2), " | IQR: ", stats_WE$iqr,
+  " \nMean: ", round(stats_WE$mean, 2), " | SD: ", round(stats_WE$sd, 2),
+  "\nStudents with a WEMWBS score <40: ", stats_WE$n_below_40,
+  " (", stats_WE$pct_below_40, "%)"
+)
+
+# Plot
+stats_WE_plot <-
+  All_scores %>%
+  ggplot(aes(x = Warwick_Edinburg_total)) +
+  geom_histogram(aes(y = ..density..), binwidth = 1, fill = "darkgreen", color = "black", alpha = 0.6) +
+  # geom_density(color = "grey20", size = 1) +
+  labs(title = title_text_WE,
+       x = "WEMWBS score",
+       y = "Density") +
+  my_theme
+
+
+
+burnout_stats <- All_scores %>%
+  summarise(
+    total = n(),
+    burnout_n = sum(Emotional_Exhaustion > 14 & Cynicism > 6 & Academic_Efficacy < 23, na.rm = TRUE)
+  ) %>%
+  mutate(
+    burnout_pct = round(100 * burnout_n / total, 2)
+  )
+
+burnout_stats
+
+# Calculer statistiques + nombre et % < 40
+stats_EE <- All_scores %>%
+  summarise(
+    min = min(Emotional_Exhaustion, na.rm = TRUE),
+    max = max(Emotional_Exhaustion, na.rm = TRUE),
+    median = median(Emotional_Exhaustion, na.rm = TRUE),
+    mean = mean(Emotional_Exhaustion, na.rm = TRUE),
+    sd = sd(Emotional_Exhaustion, na.rm = TRUE),
+   Q1 = quantile(Emotional_Exhaustion, 0.25, na.rm = TRUE),
+    Q3 = quantile(Emotional_Exhaustion, 0.75, na.rm = TRUE),
+    total = n()
+  ) %>%
+  mutate(
+    iqr = paste0("[", round(Q1, 2), "; ", round(Q3, 2), "]") 
+    ) 
+
+
+EE_counts <- All_scores %>%
+  filter(!is.na(Emotional_Exhaustion_Level)) %>%
+  group_by(Emotional_Exhaustion_Level) %>%
+  summarise(count = n()) %>%
+  ungroup() %>%
+  mutate(
+    percent = round(100 * count / sum(count), 2),
+    label = paste0(Emotional_Exhaustion_Level, ": ", count, " (", percent, "%)")
+  )
+
+# Construire le titre
+title_text_EE <-  paste0(
+  "Min: ", stats_EE$min, " | Max: ", stats_EE$max, " | Median: ", round(stats_EE$median, 2), " | IQR: ", stats_EE$iqr,
+  " \nMean: ", round(stats_EE$mean, 2), " | SD: ", round(stats_EE$sd, 2)
+)
+
+
+levels_labels <- EE_counts$label
+names(levels_labels) <- EE_counts$Emotional_Exhaustion_Level
+
+All_scores$Emotional_Exhaustion_Level <- factor(
+  All_scores$Emotional_Exhaustion_Level,
+    levels = c("Low", "Moderate", "High"),  # ordre fixe
+  labels = c(levels_labels["Low"], levels_labels["Moderate"], levels_labels["High"])
+)
+
+
+blue_palette_named <- setNames(
+  c("#a8cfff", "#5390d9", "#08306b"),
+  c(levels_labels["Low"], levels_labels["Moderate"], levels_labels["High"])
+)
+
+
+
+stats_EE_plot <- All_scores %>%
+  filter(!is.na(Emotional_Exhaustion_Level)) %>%
+  ggplot(aes(x = Emotional_Exhaustion, fill = Emotional_Exhaustion_Level)) +
+  geom_histogram(binwidth = 1, color = "black", alpha = 0.7, position = "identity") +
+  scale_fill_manual(values = blue_palette_named) +
+  labs(
+    title = title_text_EE,
+    x = "Emotional Exhaustion score (French MBI-SS)",
+    y = "Density",
+    fill = "EE Category"
+  ) +
+      geom_density(color = "grey20", size = 1) +
+  my_theme
+
+
+# Statistiques descriptives pour Cynicism
+stats_CY <- All_scores %>%
+  summarise(
+    min = min(Cynicism, na.rm = TRUE),
+    max = max(Cynicism, na.rm = TRUE),
+    median = median(Cynicism, na.rm = TRUE),
+    mean = mean(Cynicism, na.rm = TRUE),
+    sd = sd(Cynicism, na.rm = TRUE),
+ Q1 = quantile(Cynicism, 0.25, na.rm = TRUE),
+    Q3 = quantile(Cynicism, 0.75, na.rm = TRUE)  ) %>%
+  mutate(
+    iqr = paste0("[", round(Q1, 2), "; ", round(Q3, 2), "]") 
+    ) 
+
+# Comptes + % par niveau Cynicism_Level (colonne déjà existante)
+CY_counts <- All_scores %>%
+  filter(!is.na(Cynicism_Level)) %>%
+  group_by(Cynicism_Level) %>%
+  summarise(count = n()) %>%
+  ungroup() %>%
+  mutate(
+    percent = round(100 * count / sum(count), 2),
+    label = paste0(Cynicism_Level, ": ", count, " (", percent, "%)")
+  )
+
+# Construire le titre
+title_text_CY <- paste0(
+  "Min: ", stats_CY$min, " | Max: ", stats_CY$max, " | Median: ", round(stats_CY$median, 2), " | IQR: ", stats_CY$iqr,
+  " \nMean: ", round(stats_CY$mean, 2), " | SD: ", round(stats_CY$sd, 2)
+)
+
+# Facteur avec labels custom (dans l’ordre Low, Moderate, High)
+levels_labels_CY <- CY_counts$label
+names(levels_labels_CY) <- CY_counts$Cynicism_Level
+
+All_scores$Cynicism_Level <- factor(
+  All_scores$Cynicism_Level,
+  levels = c("Low", "Moderate", "High"),  # ordre fixe
+  labels = c(levels_labels_CY["Low"], levels_labels_CY["Moderate"], levels_labels_CY["High"])
+)
+
+# Palette nuances de bleu (ou autre couleur si tu préfères)
+blue_palette_named_CY <- setNames(
+  c("#a8cfff", "#5390d9", "#08306b"),
+  c(levels_labels_CY["Low"], levels_labels_CY["Moderate"], levels_labels_CY["High"])
+)
+
+# Plot Cynicism
+stats_CY_plot <- All_scores %>%
+  filter(!is.na(Cynicism_Level)) %>%
+  ggplot(aes(x = Cynicism, fill = Cynicism_Level)) +
+  geom_histogram(binwidth = 1, color = "black", alpha = 0.7, position = "identity") +
+  scale_fill_manual(values = blue_palette_named_CY) +
+  labs(
+    title = title_text_CY,
+    x = "Cynicism score (French MBI-SS)",
+    y = "Density",
+    fill = "CY Category"
+  ) +
+  my_theme
+
+# Statistiques descriptives Academic_Efficacy
+stats_AE <- All_scores %>%
+  summarise(
+    min = min(Academic_Efficacy, na.rm = TRUE),
+    max = max(Academic_Efficacy, na.rm = TRUE),
+    median = median(Academic_Efficacy, na.rm = TRUE),
+    mean = mean(Academic_Efficacy, na.rm = TRUE),
+    sd = sd(Academic_Efficacy, na.rm = TRUE),
+ Q1 = quantile(Academic_Efficacy, 0.25, na.rm = TRUE),
+    Q3 = quantile(Academic_Efficacy, 0.75, na.rm = TRUE)  ) %>%
+  mutate(
+    iqr = paste0("[", round(Q1, 2), "; ", round(Q3, 2), "]") 
+    ) 
+
+# Comptes + % par niveau Academic_Efficacy_Level (colonne déjà existante)
+AE_counts <- All_scores %>%
+  filter(!is.na(Academic_Efficacy_Level)) %>%
+  group_by(Academic_Efficacy_Level) %>%
+  summarise(count = n()) %>%
+  ungroup() %>%
+  mutate(
+    percent = round(100 * count / sum(count), 2),
+    label = paste0(Academic_Efficacy_Level, ": ", count, " (", percent, "%)")
+  )
+
+# Construire le titre
+title_text_AE <- paste0(
+  "Min: ", stats_AE$min, " | Max: ", stats_AE$max, " | Median: ", round(stats_AE$median, 2), " | IQR: ", stats_AE$iqr,
+  " \nMean: ", round(stats_AE$mean, 2), " | SD: ", round(stats_AE$sd, 2)
+)
+
+# Facteur avec labels custom (ordre Low, Moderate, High)
+levels_labels_AE <- AE_counts$label
+names(levels_labels_AE) <- AE_counts$Academic_Efficacy_Level
+
+All_scores$Academic_Efficacy_Level <- factor(
+  All_scores$Academic_Efficacy_Level,
+  levels = c("Low", "Moderate", "High"),
+  labels = c(levels_labels_AE["Low"], levels_labels_AE["Moderate"], levels_labels_AE["High"])
+)
+
+# Palette nuances de bleu
+blue_palette_named_AE <- setNames(
+  c("#a8cfff", "#5390d9", "#08306b"),
+  c(levels_labels_AE["Low"], levels_labels_AE["Moderate"], levels_labels_AE["High"])
+)
+
+# Plot Academic_Efficacy
+stats_AE_plot <- All_scores %>%
+  filter(!is.na(Academic_Efficacy_Level)) %>%
+  ggplot(aes(x = Academic_Efficacy, fill = Academic_Efficacy_Level)) +
+  geom_histogram(binwidth = 1, color = "black", alpha = 0.7, position = "identity") +
+  scale_fill_manual(values = blue_palette_named_AE) +
+  labs(
+    title = title_text_AE,
+    x = "Academic Efficacy score (French MBI-SS)",
+    y = "Density",
+    fill = "AE Category"
+  ) +
+  my_theme
+
+combined_density_plot <-
+  (stats_WE_plot / stats_EE_plot / stats_CY_plot / stats_AE_plot)
+  
+ggsave("./Result/Figures/combined_density_plotF2AB.png", combined_density_plot, width = 6, height = 10, dpi = 300)
+
+combined_density_plot_test <-
+  ( stats_EE_plot + stats_CY_plot + stats_AE_plot) / (stats_WE_plot + stats_WE_plot + stats_WE_plot)
+  
+ggsave("./Result/Figures/combined_density_plotF2ABtest2.png", combined_density_plot_test, width = 15, height = 8, dpi = 300)
+
+ggsave("./Result/Figures/SCOFFF2C.png", SCOFF_score_ditrib, width = 18, height = 5, dpi = 300)
+
+ggsave(filename = "./Result/Figures/Figure.png", SCOFF_score_ditrib, )
+
+
+# All_score correlation 
+
+All_scores_reordered <-
+  All_scores %>% dplyr::select(where(is.numeric)) %>%
+  dplyr::rename(
+    WEMWBS =  Warwick_Edinburg_total,
+    SCOFF = SCOFF_total
+  ) %>% 
+  select(
+    WEMWBS,                       # rename later
+    Emotional_Exhaustion,
+    Cynicism,
+    Academic_Efficacy,
+    SCOFF                         # rename later
+  ) 
+
+# All_scores_reordered %>%
+#   ggpairs()
+library(corrplot)
+library(corrplot)
+
+cor_matrix <- cor(All_scores_reordered, use = "pairwise.complete.obs", method = "pearson")
+
+cor.mtest <- function(mat) {
+  mat <- as.matrix(mat)
+  n <- ncol(mat)
+  p.mat <- matrix(NA, n, n)
+  diag(p.mat) <- 0
+  for (i in 1:(n-1)) {
+    for (j in (i+1):n) {
+      test <- cor.test(mat[, i], mat[, j])
+      p.mat[i, j] <- test$p.value
+      p.mat[j, i] <- test$p.value
+    }
+  }
+  colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+  return(p.mat)
+}
+
+p_matrix <- cor.mtest(All_scores_reordered)
+
+stars_mat <- matrix("", ncol = ncol(cor_matrix), nrow = nrow(cor_matrix))
+rownames(stars_mat) <- colnames(stars_mat) <- colnames(cor_matrix)
+
+stars_mat[p_matrix <= 0.001] <- "***"
+stars_mat[p_matrix > 0.001 & p_matrix <= 0.01] <- "**"
+stars_mat[p_matrix > 0.01 & p_matrix <= 0.05] <- "*"
+
+png("./Result/Figures/Fig2D.png", width = 1000, height = 1000, res = 120)
+corrplot(cor_matrix,
+         type = "upper",
+         method = "square",
+         addCoef.col = "black",  # coefficients en noir
+         tl.col = "black",       # texte des labels en noir
+         tl.srt = 45,            # rotation des labels
+         number.cex = 0.8,       # taille des coefficients
+         diag = FALSE
+)
+
+# Ajouter les étoiles sur le graphique
+# Ajouter les étoiles sur le graphique, un peu plus haut et en gris
+n <- ncol(cor_matrix)
+for (i in 1:(n-1)) {
+  for (j in (i+1):n) {
+    star <- stars_mat[i, j]
+    if (star != "") {
+      x_pos <- j
+      y_pos <- n - i + 1
+      # Décalage vertical : +0.3 pour monter un peu
+      text(x = x_pos, y = y_pos + 0.1, labels = star, col = "grey0", cex = 1.5, font = 2)
+    }
+  }
+}
+dev.off()
+
+
+```
+
+
+```{r Distribution of responses by university, fig.width=20, fig.height=10}
+# Count responses per university
+df_univ <- Reponse_EBE_P1_final %>%
+  count(University)
+
+
+# Optional: sort by descending count
+df_univ <- df_univ %>%
+  arrange(desc(n))
+
+# Plot
+df_univ_plot <-
+  ggplot(df_univ, aes(x = reorder(University, n), y = n)) +
+  geom_bar(stat = "identity", fill = "darkblue") +
+  geom_text(aes(label = n),
+            hjust = 1.1,
+            color = "grey99",
+            size = 2.7) +
+  coord_flip() +
+  scale_y_continuous(expand = c(0.01, 0)) +  # small space at the start
+  labs(title = "Distribution of responses by University",
+       x = "University",
+       y = "Number of responses") +
+  my_theme
+
+ggsave("./Result/Figures/FigS1.png", df_univ_plot, width = 9, height = 4.5)
+```
+
+
+```{r Score by university, fig.width=20, fig.height=12}
+# Préparer les données
+Score_and_univeristy <- Reponse_EBE_P1_final %>%
+  dplyr::select("University") %>%
+  cbind(All_scores) %>%
+  select(c("University", where(is.numeric)))
+
+# Format long
+data_long <- Score_and_univeristy %>%
+  pivot_longer(
+    cols = -University,
+    names_to = "Score_Type",
+    values_to = "Score"
+  )
+
+# Diviser les données par Score_Type
+data_split <- data_long %>% group_split(Score_Type)
+score_names <- data_long %>% distinct(Score_Type) %>% pull()
+
+# Créer les plots
+plots <- map2(data_split, score_names, function(df, score_name) {
+  
+  # Médiane nationale
+  national_median <- df %>%
+    summarize(National_Median = median(Score, na.rm = TRUE)) %>%
+    pull(National_Median)
+  
+  # Statistiques par université : médiane, max, effectif
+  university_stats <- df %>%
+    group_by(University) %>%
+    summarize(
+      Uni_Median = median(Score, na.rm = TRUE),
+      Max_Score = max(Score, na.rm = TRUE),
+      N = n(),
+      .groups = "drop"
+    )
+  
+  # Première université pour placer le label national median
+  first_uni <- df %>% pull(University) %>% unique() %>% sort() %>% first()
+  
+  ggplot(df, aes(x = University, y = Score, fill = University)) +
+    geom_violin(alpha = 0.3, colour = "grey40", draw_quantiles = c(0.25, 0.5, 0.75)) +
+    geom_sina(alpha = 0.3) +
+    
+    # Ligne médiane nationale
+    geom_hline(yintercept = national_median, linetype = "dashed", color = "black") +
+    
+    # Texte médiane nationale à gauche (sur la première université)
+    annotate(
+      "text",
+      x = first_uni,
+      y = national_median,
+      label = paste0("National median: ", round(national_median, 1)),
+      hjust = 0, vjust = -1, color = "red3", size = 3
+    ) +
+    
+    # Texte médiane + effectif placé juste au-dessus du max de chaque université
+    geom_text(
+      data = university_stats, 
+      aes(x = University, y = Max_Score + 0.5, label = paste0("(n = ", N, ")")),
+      vjust = 0, size = 3, color = "black", inherit.aes = FALSE
+    ) +
+    
+    labs(title = paste("Score:", score_name),
+         x = "University", y = "Score") +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      legend.position = "none"
+    )
+})
+plots
+
+```
+
+
+
+```{r upset plot, fig.width=12, fig.height=7}
+
+make_upset_plot <- function(data, prefix, keep_order = FALSE) {
+  # 1. Sélectionner et recoder en binaire
+  df_binary <- data %>%
+    select(contains(prefix)) %>%
+    mutate(across(everything(), ~ ifelse(.x == "Yes", 1,
+                                         ifelse(.x == "No", 0, NA)))) %>%
+    filter(if_all(everything(), ~ !is.na(.)))
+  
+  # 2. Renommer les colonnes en retirant le préfixe
+  colnames(df_binary) <- str_remove(colnames(df_binary), prefix)
+  
+  # 3. Calculer le nombre de "Yes" et trier les colonnes
+  yes_counts <- colSums(df_binary)
+  ordered_columns <- names(sort(yes_counts, decreasing = TRUE))
+  df_binary <- df_binary[, ordered_columns]
+  
+  # 4. Ajouter "(n = X)" aux noms de colonnes
+  new_colnames <- paste0(ordered_columns, " (n = ", yes_counts[ordered_columns], ")")
+  colnames(df_binary) <- new_colnames
+  
+  # 5. Afficher le plot UpSet
+  upset(
+    df_binary,
+    sets = new_colnames,
+    order.by = "freq",
+    keep.order = keep_order
+  )
+}
+
+make_upset_plot(Reponse_EBE_P1_final, "HighSchool_Last_Year_specialty_", keep_order = TRUE)
+make_upset_plot(Reponse_EBE_P1_final, "HighSchool_SecondLast_Year_specialty_", keep_order = TRUE)
+
+bacc_single <- Reponse_EBE_P1_final %>%
+  filter(!is.na(Baccalaureate_Field)) %>%
+  count(Baccalaureate_Field) %>%
+  mutate(freq = n / sum(n) * 100)
+
+my_colors <- brewer.pal(4, "Set2")  # soft pastel colors, great for 4 categories
+
+```
+
+```{r Bacc, fig.width=5, fig.height=4}
+
+ggplot(bacc_single, aes(x = 1, y = freq, fill = Baccalaureate_Field)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_text(aes(label = paste0(round(freq, 1), "%")),
+            position = position_stack(vjust = 0.5), size = 4, color = "black") +
+  coord_flip() +
+  scale_fill_manual(values = my_colors) +
+  labs(
+    title = "Distribution of Baccalaureate Fields (in %)",
+    x = NULL,
+    #y = "Percentage (%)",
+    fill = "Field"
+  ) +
+  theme_minimal() +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+
+```
+
+
+```{r upset plot part 2, fig.width=12, fig.height=7}
+
+make_upset_plot(Reponse_EBE_P1_final, "Info_source_", keep_order = TRUE)
+make_upset_plot(Reponse_EBE_P1_final %>% dplyr::select(-Psychiatric_history_Yes), "Psychiatric_history_", keep_order = TRUE)
+make_upset_plot(Reponse_EBE_P1_final, "Violence_suffered_from_", keep_order = TRUE)
+
+
+make_upset_plot(Reponse_EBE_P1_final, "Violence_type_", keep_order = TRUE) 
+
+make_upset_plot(Reponse_EBE_P1_final, "Tutoring_service_looked_for_", keep_order = TRUE) 
+make_upset_plot(Reponse_EBE_P1_final, "Private_preparation_service_looked_for_", keep_order = TRUE) 
+
+
+make_upset_plot(Reponse_EBE_P1_final, "Academic_pre_entry_", keep_order = TRUE) 
+make_upset_plot(Reponse_EBE_P1_final %>%
+                  dplyr::select(-Workplace_suitable_for_your_needs), "Workplace_", keep_order = TRUE) 
+
+# make_upset_plot(Reponse_EBE_P1_final, "Suicidal_thoughts_Frequency_", keep_order = TRUE) 
+#  Not used anymore
+
+```
+
+
+```{r health track, fig.width=18, fig.height=9}
+
+
+Reponse_EBE_P1_final$Fifth_choice_health_track <- Reponse_EBE_P1_final$Fifth_choice_health_track %>%
+  dplyr::recode(
+    "No fifth choice other than fourth" = "No fifth choice different from fourth"
+  )
+
+
+
+health_track_long <- Reponse_EBE_P1_final %>%
+  select(contains("health_track")) %>%
+  mutate(Respondent_ID = row_number()) %>%
+  pivot_longer(
+    cols = -Respondent_ID,
+    names_to = "Choice_Order",
+    values_to = "Health_Track"
+  )
+
+
+
+health_track_long <- Reponse_EBE_P1_final %>%
+  select(contains("health_track")) %>%
+  mutate(Respondent_ID = row_number()) %>%
+  pivot_longer(
+    cols = -Respondent_ID,
+    names_to = "Choice_Order",
+    values_to = "Health_Track"
+  ) %>%
+  mutate(
+    # 3. Ordonner les niveaux de Choice_Order
+    Choice_Order = factor(Choice_Order, levels = c(
+      "First_choice_health_track",
+      "Second_choice_health_track",
+      "Third_choice_health_track",
+      "Fourth_choice_health_track",
+      "Fifth_choice_health_track"
+    ))
+  )
+
+# 3. Plot
+ggplot(health_track_long %>% filter(!is.na(Health_Track)),
+       aes(x = fct_infreq(Health_Track))) +
+  geom_bar(fill = "#3182bd") +
+  geom_text(stat = "count", aes(label = after_stat(count)), hjust = -0.1, size = 3.5) +
+  coord_flip() +
+  facet_wrap(~ Choice_Order, scales = "free_y") +
+  labs(
+    title = "Distribution of Health Track Choices by Rank",
+    x = "Health Track",
+    y = "Number of Respondents"
+  ) +
+  my_theme +
+  theme(strip.text = element_text(size = 12),
+        plot.title = element_text(face = "bold")) +
+  expand_limits(y = 1.05 * max(table(health_track_long$Health_Track, health_track_long$Choice_Order)))
+
+
+
+
+# Step 1: Reshape to long format
+  health_track_long_2 <- Reponse_EBE_P1_final %>%
+  select(contains("health_track")) %>%
+  mutate(Respondent_ID = row_number()) %>%
+  pivot_longer(
+    cols = -Respondent_ID,
+    names_to = "Choice_Order",
+    values_to = "Health_Track"
+  ) %>%
+  mutate(
+    Health_Track = if_else(str_detect(Health_Track, "No .* choice different from .*"),
+                           NA_character_,
+                           Health_Track),
+    Choice_Order = factor(Choice_Order,
+                          levels = c("First_choice_health_track",
+                                     "Second_choice_health_track",
+                                     "Third_choice_health_track",
+                                     "Fourth_choice_health_track",
+                                     "Fifth_choice_health_track"),
+                          labels = c("1st", "2nd", "3rd", "4th", "5th"))
+  ) %>%
+  filter(!is.na(Health_Track))
+
+# Count number of respondents per Health_Track and Choice_Order
+data_count <- health_track_long_2 %>%
+  group_by(Health_Track, Choice_Order) %>%
+  summarise(count = n(), .groups = "drop")
+
+# Reorder health tracks by overall frequency
+health_levels <- health_track_long_2 %>%
+  count(Health_Track) %>%
+  arrange(desc(n)) %>%
+  pull(Health_Track)
+
+data_count <- data_count %>%
+  mutate(Health_Track = factor(Health_Track, levels = health_levels),
+         Choice_Order = fct_rev(Choice_Order))  # Reverse choice order (5th -> 1st)
+
+```
+
+```{r health track second plot, fig.width=10, fig.height=7}
+
+# Plot with counts inside bars
+ggplot(data_count, aes(x = Health_Track, y = count, fill = Choice_Order)) +
+  geom_col() +
+  geom_text(aes(label = count), position = position_stack(vjust = 0.5), size = 3) +
+  coord_flip() +
+  scale_fill_brewer(palette = "Blues", direction = -1) +
+  labs(
+    title = "Number of Respondents by Health Track and Choice Order",
+    x = "Health Track",
+    y = "Number of Respondents",
+    fill = "Choice Order"
+  ) +
+  theme_minimal(base_size = 14)
+
+```
+
+```{r PASS / LAS tbl_summary}
+
+
+Reponse_EBE_P1_final %>%
+  dplyr::select(
+    Current_track,
+    PASS_before_LAS,
+    Current_study_year,
+    LAS_chosen_first,
+    LAS_major,
+    LAS_major_first_choice,
+    LAS_continue_if_failed,
+    PASS_chosen_first,
+    PASS_minor,
+    PASS_minor_first_choice,
+    PASS_continue_if_failed
+  ) %>% tbl_summary()
+
+```
+ 
+  
+```{r last dataframe for summary}
+
+Reponse_EBE_P1_for_summary_withoutscore <-
+  Reponse_EBE_P1_final %>%
+  dplyr::select(
+    -contains("Psychoactive"),
+    -contains("Psychotropic"),
+     -all_of(HAD_correspondance$Code), #Finally we remove it
+    -contains("HighSchool_Last_Year_specialty_"), 
+    -contains("HighSchool_SecondLast_Year_specialty_"), 
+    -contains("Baccalaureate_Field"), 
+    -contains("University"),
+    -contains("Info_source_"),
+    -contains("Violence_suffered_from_"),
+   # -contains("Violence_type_"),
+    -contains("Tutoring_service_looked_for_"),
+    -contains("Private_preparation_service_looked_for_"),
+   -matches("Academic_pre_entry_(?!.*No)", perl = TRUE),
+    -contains("Workplace_"),
+    -contains("Suicidal_thoughts_Frequency_"),
+   -matches("health_track(?!.*First)", perl = TRUE),
+  -matches("Psychiatric_history_(?!.*(Yes|Eating|Anxiety|Depression))", perl = TRUE),
+  -matches("Violence_type_(?!.*(Moral|Discrimination))", perl = TRUE),
+   -PASS_before_LAS,
+    -Current_study_year,
+    -LAS_chosen_first,
+    -LAS_major,
+    -LAS_major_first_choice,
+    -LAS_continue_if_failed,
+    -PASS_chosen_first,
+    -PASS_minor,
+    -PASS_minor_first_choice,
+    -PASS_continue_if_failed
+  ) %>%
+  as_tibble() 
+
+Reponse_EBE_P1_for_summary <-
+  cbind(Reponse_EBE_P1_for_summary_withoutscore, All_scores %>% dplyr::select(-contains("Level")))
+
+Reponse_EBE_P1_for_summary$Age <- factor(
+  Reponse_EBE_P1_for_summary$Age,
+  levels = c("between 18 and 20 years", "between 21 and 23", "24 years and over")
+)
+
+Reponse_EBE_P1_for_summary$Psychiatric_history_Anxiety <- Reponse_EBE_P1_for_summary$Psychiatric_history_Anxiety %>%
+  na_if("NA") %>%        # transforme "NA" (chaine) en NA (valeur manquante)
+  as.factor()
+
+Reponse_EBE_P1_for_summary$Psychiatric_history_Depression <- Reponse_EBE_P1_for_summary$Psychiatric_history_Depression %>%
+  na_if("NA") %>%        # transforme "NA" (chaine) en NA (valeur manquante)
+  as.factor()
+
+
+
+Reponse_EBE_P1_for_summary$Psychiatric_history_Eating_disorder <- Reponse_EBE_P1_for_summary$Psychiatric_history_Eating_disorder %>%
+  na_if("NA") %>%        # transforme "NA" (chaine) en NA (valeur manquante)
+  as.factor()
+
+
+
+Reponse_EBE_P1_for_summary$Psychiatric_history_Yes <- Reponse_EBE_P1_for_summary$Psychiatric_history_Yes %>%
+  na_if("Do not wish to answer") %>%   # remplace "Do not wish to answer" par NA
+  as.factor()
+
+Reponse_EBE_P1_for_summary$Distance_home_univversity <-
+  Reponse_EBE_P1_for_summary$Distance_home_univversity %>% as.factor()
+
+
+Reponse_EBE_P1_for_summary$Distance_home_univversity <- Reponse_EBE_P1_for_summary$Distance_home_univversity %>%
+  fct_relevel(
+    "less than 15 minutes",
+    "between 15 and 30 minutes",
+    "between 30 minutes and 1 hour",
+    "between 1h and 1h30",
+    "more than 1h30"
+  )
+
+
+Reponse_EBE_P1_for_summary$Baccalaureate_Year <- factor(
+  Reponse_EBE_P1_for_summary$Baccalaureate_Year,
+  levels = c(
+    "Before 2019 (included)",
+    "2020 Covid year",
+    "Between 2021 and 2023", "2024"
+  )
+)
+
+Reponse_EBE_P1_for_summary$Baccalaureate_honors <- factor(
+  Reponse_EBE_P1_for_summary$Baccalaureate_honors,
+  levels = c(
+    "No honours",
+    "Quite good",
+    "Good",
+    "Very good",
+    "Highest_honours_more_than_18out20"
+  )
+)
+
+Reponse_EBE_P1_for_summary$Weekly_study_hours <- factor(
+  Reponse_EBE_P1_for_summary$Weekly_study_hours,
+  levels = c(
+    "Less than 15 hours",
+    "15 to 30 hours",
+    "30 to 45 hours",
+    "45 to 60 hours",
+    "60 to 75 hours",
+    "More than 75 hours"
+  )
+)
+
+Reponse_EBE_P1_for_summary$Weekly_hours_leisure_time <- factor(
+  Reponse_EBE_P1_for_summary$Weekly_hours_leisure_time,
+  levels = c(
+    "Less than 5 hours",
+    "5 to 10 hours",
+    "10 to 15 hours",
+    "15 to 20 hours",
+    "More than 20 hours"
+  )
+)
+
+Reponse_EBE_P1_for_summary$All_nighter_study <- factor(
+  Reponse_EBE_P1_for_summary$All_nighter_study,
+  levels = c(
+    "Never",
+    "Daily",
+    "Weekly",
+    "Monthly"
+  )
+)
+
+Reponse_EBE_P1_for_summary$Weight_change_since_academic_year_beginning <- factor(
+  Reponse_EBE_P1_for_summary$Weight_change_since_academic_year_beginning,
+  levels = c(
+    "No difference",
+    "a loss of between 5 and 10% of your body weight",
+    "a loss of at least 10% of your body weight",
+    "an increase of between 5 and 10% in your weight",
+    "an increase of at least 10% in your weight"
+  )
+)
+
+Reponse_EBE_P1_for_summary$Distance_home_univversity <- factor(
+  Reponse_EBE_P1_for_summary$Distance_home_univversity,
+  levels = c("less than 15 minutes",
+             "between 15 and 30 minutes",
+             "between 30 minutes and 1 hour",
+             "between 1h and 1h30",
+             "more than 1h30"),
+  ordered = TRUE
+)
+
+Reponse_EBE_P1_for_summary$Marital_status <- factor(
+  Reponse_EBE_P1_for_summary$Marital_status,
+  levels = c("Single", "Couple", "Married or civil union", "Widowed")
+)
+
+Reponse_EBE_P1_for_summary <- Reponse_EBE_P1_for_summary %>%
+  mutate(Tutoring_participation_influence = factor(
+    Tutoring_participation_influence,
+    levels = c("Very negative", "Negative", "Neutral", "Positive", "Very positive"),
+    ordered = FALSE
+  ))
+
+Reponse_EBE_P1_for_summary <- Reponse_EBE_P1_for_summary %>%
+  mutate(Private_preparation_influence = factor(
+    Private_preparation_influence,
+    levels = c("Very negative", "Negative", "Neutral", "Positive", "Very positive"),
+    ordered = FALSE
+  ))
+
+
+    
+Reponse_EBE_P1_summary <- Reponse_EBE_P1_for_summary %>%
+  tbl_summary(
+    statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    digits = list(
+      all_categorical() ~ c(0, 2)  # n with 0 decimals, p with 2 decimals
+    )
+  )
+
+Reponse_EBE_P1_summary %>% as_tibble() %>%
+  writexl::write_xlsx("./Result/Reponse_EBE_P1_summary.xlsx")
+
+
+Reponse_EBE_P1_summary_gender <-
+  Reponse_EBE_P1_for_summary %>% 
+  filter(Gender != "Other") %>%
+  tbl_summary(
+    by = "Gender",
+     statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    digits = list(
+      all_categorical() ~ c(0, 2))
+  ) %>%
+  add_overall() %>%
+  add_p(
+    #pvalue_fun = identity
+        ) %>%  # show exact p-values
+  add_q() %>%
+  bold_p()
+
+Reponse_EBE_P1_summary_gender %>% as_tibble() %>%
+  writexl::write_xlsx("./Result/Reponse_EBE_P1_summary_gender.xlsx")
+
+
+Reponse_EBE_P1_summary_track <-
+  Reponse_EBE_P1_for_summary %>% tbl_summary(by = "Current_track",
+     statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    digits = list(
+      all_categorical() ~ c(0, 2))) %>%
+  add_p(
+    #pvalue_fun = identity
+    ) %>% add_q() %>% bold_p()
+
+Reponse_EBE_P1_summary_track %>% as_tibble() %>%
+  writexl::write_xlsx("./Result/Reponse_EBE_P1_summary_track.xlsx")
+
+
+
+Reponse_EBE_P1_summary_univr <-
+  cbind(Reponse_EBE_P1_for_summary, (Reponse_EBE_P1_final %>% dplyr::select("University"))) %>% tbl_summary(by = "University",
+     statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    digits = list(
+      all_categorical() ~ c(0, 2))) %>%
+  add_overall()
+
+Reponse_EBE_P1_summary_univr %>% as_tibble() %>%
+  writexl::write_xlsx("./Result/Reponse_EBE_P1_summary_univr.xlsx")
+
+
+```
+
+```{r regression function and data_wrangig}
+library(ordinal)
+
+Reponse_EBE_P1_for_regression <-
+  Reponse_EBE_P1_for_summary %>%
+  dplyr::select(-contains("Parent"),
+         -Dependent_children,
+         -Scolarship_level,
+         -Tutoring_participation_can_be,
+         -Private_preparation_participation_can_be,
+         -Social_and_solidarity_grocery_store
+         )
+
+Reponse_EBE_P1_for_regression$SCOFF_total <- as.factor(Reponse_EBE_P1_for_regression$SCOFF_total)
+
+
+translation_map <- setNames(Recode_of_every_possible_answer$translation_num,
+                            Recode_of_every_possible_answer$translation)
+
+# Fonction de recodage qui garde les valeurs non trouvées
+safe_recode <- function(x, map) {
+  recoded <- map[as.character(x)]
+  ifelse(is.na(recoded), x, recoded)
+}
+
+
+
+# Application sur tout le dataframe
+Reponse_EBE_P1_for_regression_recoded <- Reponse_EBE_P1_for_regression %>%
+  mutate(across(everything(), ~ safe_recode(., translation_map)))
+Reponse_EBE_P1_for_regression_recoded$SCOFF_total <-
+  as.factor(Reponse_EBE_P1_for_regression_recoded$SCOFF_total)
+
+Reponse_EBE_P1_for_regression_recoded$Age <- factor(
+  Reponse_EBE_P1_for_regression_recoded$Age,
+  levels = c("between 18 and 20 years", "between 21 and 23", "24 years and over")
+)
+
+Reponse_EBE_P1_for_regression_recoded$Baccalaureate_Year <- factor(
+  Reponse_EBE_P1_for_summary$Baccalaureate_Year,
+  levels = c(
+    "Before 2019 (included)",
+    "2020 Covid year",
+    "Between 2021 and 2023", "2024"
+  )
+)
+
+
+
+Reponse_EBE_P1_for_regression_recoded$Baccalaureate_honors <- factor(
+  Reponse_EBE_P1_for_regression_recoded$Baccalaureate_honors,
+  levels = c(
+    "No honours",
+    "Quite good",
+    "Good",
+    "Very good",
+    "Highest_honours_more_than_18out20"
+  )
+)
+
+Reponse_EBE_P1_for_regression_recoded$Weekly_study_hours <- factor(
+  Reponse_EBE_P1_for_regression_recoded$Weekly_study_hours,
+  levels = c(
+    "Less than 15 hours",
+    "15 to 30 hours",
+    "30 to 45 hours",
+    "45 to 60 hours",
+    "60 to 75 hours",
+    "More than 75 hours"
+  )
+)
+
+Reponse_EBE_P1_for_regression_recoded$Weekly_hours_leisure_time <- factor(
+  Reponse_EBE_P1_for_regression_recoded$Weekly_hours_leisure_time,
+  levels = c(
+    "Less than 5 hours",
+    "5 to 10 hours",
+    "10 to 15 hours",
+    "15 to 20 hours",
+    "More than 20 hours"
+  )
+)
+
+Reponse_EBE_P1_for_regression_recoded$All_nighter_study <- factor(
+  Reponse_EBE_P1_for_regression_recoded$All_nighter_study,
+  levels = c(
+    "Never",
+    "Daily",
+    "Weekly",
+    "Monthly"
+  )
+)
+
+Reponse_EBE_P1_for_regression_recoded$Weight_change_since_academic_year_beginning <- factor(
+  Reponse_EBE_P1_for_regression_recoded$Weight_change_since_academic_year_beginning,
+  levels = c(
+    "No difference",
+    "a loss of between 5 and 10% of your body weight",
+    "a loss of at least 10% of your body weight",
+    "an increase of between 5 and 10% in your weight",
+    "an increase of at least 10% in your weight"
+  )
+)
+
+Reponse_EBE_P1_for_regression_recoded$Distance_home_univversity <- factor(
+  Reponse_EBE_P1_for_regression_recoded$Distance_home_univversity,
+  levels = c("less than 15 minutes",
+             "between 15 and 30 minutes",
+             "between 30 minutes and 1 hour",
+             "between 1h and 1h30",
+             "more than 1h30")#,
+  #ordered = TRUE
+)
+
+
+# Remplacer "Do not wish to answer" par NA
+Reponse_EBE_P1_for_regression_recoded$Violence_suffered <- as.character(Reponse_EBE_P1_for_regression_recoded$Violence_suffered)
+Reponse_EBE_P1_for_regression_recoded$Violence_suffered[Reponse_EBE_P1_for_regression_recoded$Violence_suffered == "Do not wish to answer"] <- NA
+
+# Reconvertir en facteur (optionnel, selon ce que tu veux faire ensuite)
+Reponse_EBE_P1_for_regression_recoded$Violence_suffered <- factor(
+  Reponse_EBE_P1_for_regression_recoded$Violence_suffered,
+  levels = c("No", "Yes")
+)
+
+# Find columns whose names contain "Violence_type"
+violence_cols <- grep("Violence_type", names(Reponse_EBE_P1_for_regression_recoded), value = TRUE)
+
+# Loop through these columns and replace "Do not wish to answer" by NA,
+# then relevel factors with just "No" and "Yes" (dropping NA level)
+for(col in violence_cols) {
+  # Convert to character first
+  Reponse_EBE_P1_for_regression_recoded[[col]] <- as.character(Reponse_EBE_P1_for_regression_recoded[[col]])
+  
+  # Replace "Do not wish to answer" by NA
+  Reponse_EBE_P1_for_regression_recoded[[col]][
+    Reponse_EBE_P1_for_regression_recoded[[col]] == "Do not wish to answer"
+  ] <- NA
+  
+  # Convert to factor with levels "No" and "Yes" only (NA stays as missing)
+  Reponse_EBE_P1_for_regression_recoded[[col]] <- factor(
+    Reponse_EBE_P1_for_regression_recoded[[col]],
+    levels = c("No", "Yes")
+  )
+}
+
+Reponse_EBE_P1_for_regression_recoded$Marital_status <- 
+  factor(Reponse_EBE_P1_for_regression_recoded$Marital_status,
+                            levels = c("Single", "Couple", "Married or civil union", "Widowed"))
+
+
+Reponse_EBE_P1_for_regression_recoded <- Reponse_EBE_P1_for_regression_recoded %>%
+  mutate(Tutoring_participation_influence = factor(Tutoring_participation_influence,
+                                                levels = c("Very negative", "Negative", "Neutral", "Positive", "Very positive"),
+                                                ordered = F))
+
+Reponse_EBE_P1_for_regression_recoded <- Reponse_EBE_P1_for_regression_recoded %>%
+  mutate(Private_preparation_influence = factor(Private_preparation_influence,
+                                                   levels = c("Very negative", "Negative", "Neutral", "Positive", "Very positive"),
+                                                   ordered = F))
+
+# Create a named vector for mapping
+translation_map <- setNames(Recode_of_every_possible_answer$translation_num,
+                            Recode_of_every_possible_answer$translation)
+
+# Fonction de recodage qui garde les valeurs non trouvées
+safe_recode <- function(x, map) {
+  recoded <- map[as.character(x)]
+  ifelse(is.na(recoded), x, recoded)
+}
+
+Reponse_EBE_P1_for_regression_recoded <- Reponse_EBE_P1_for_regression_recoded %>%
+  mutate(across(
+    where(~ is.character(.x) && all(!is.na(suppressWarnings(as.numeric(.x))))),
+    ~ as.numeric(.x)
+  ))
+
+
+
+Reponse_EBE_P1_for_regression_recoded <- Reponse_EBE_P1_for_regression_recoded %>%
+  mutate(
+    MBI_SS_burnout_status = if_else(
+      Emotional_Exhaustion > 14 & Cynicism > 6 & Academic_Efficacy < 23,
+      1,
+      0
+    )
+  )
+
+
+
+
+
+univariate_lm_analysis <-
+  function(data, var_to_explain, explanatory_vars){
+    explanatory_vars %>%       # begin with variables of interest
+      str_c(paste0(var_to_explain, " ~ "), .) %>%         # combine each variable into formula ("outcome ~ variable of interest")
+      # iterate through each univariate formula
+      map(                               
+        .f = ~lm(                       # pass the formulas one-by-one to glm()
+          formula = as.formula(.x),      # within glm(), the string formula is .x
+          data = data)) %>%       # dataset
+      # tidy up each of the glm regression outputs from above
+      map(
+        .f = ~tbl_regression(
+          .x)) %>%
+      tbl_stack()%>%
+      add_q()
+  }
+
+multivariate_lm_analysis_m1AgeGender <- function(data, var_to_explain, explanatory_vars) {
+  explanatory_vars %>%
+    map(function(var) {
+      formula_str <- paste0(var_to_explain, " ~ Age + Gender + Current_track + ", var)
+      model <- lm(formula = as.formula(formula_str), data = data)
+      
+      tbl_regression(
+        model,
+        include = all_of(var)  # show only the main tested variable
+      )
+    }) %>%
+    tbl_stack()%>%
+      add_q()
+}
+
+
+multivariate_lm_analysis_m2_forWarwick_Edinburg_total <- function(data, var_to_explain, explanatory_vars) {
+  explanatory_vars %>%
+    map(function(var) {
+      formula_str <- paste0(var_to_explain, " ~ Academic_Efficacy + Cynicism + Emotional_Exhaustion + SCOFF_total + ", var)
+      model <- lm(formula = as.formula(formula_str), data = data)
+      
+      tbl_regression(
+        model,
+        include = all_of(var)  # show only the main tested variable
+      )
+    }) %>%
+    tbl_stack()%>%
+      add_q()
+}
+
+
+multivariate_lm_analysis_m2_for_Academic <- function(data, var_to_explain, explanatory_vars) {
+  explanatory_vars %>%
+    map(function(var) {
+      formula_str <- paste0(var_to_explain, " ~ Warwick_Edinburg_total + Cynicism + Emotional_Exhaustion + SCOFF_total + ", var)
+      model <- lm(formula = as.formula(formula_str), data = data)
+      
+      tbl_regression(
+        model,
+        include = all_of(var)  # show only the main tested variable
+      )
+    }) %>%
+    tbl_stack()%>%
+      add_q()
+}
+multivariate_lm_analysis_m2_forcynism <- function(data, var_to_explain, explanatory_vars) {
+  explanatory_vars %>%
+    map(function(var) {
+      formula_str <- paste0(var_to_explain, " ~ Academic_Efficacy + Warwick_Edinburg_total + Emotional_Exhaustion + SCOFF_total + ", var)
+      model <- lm(formula = as.formula(formula_str), data = data)
+      
+      tbl_regression(
+        model,
+        include = all_of(var)  # show only the main tested variable
+      )
+    }) %>%
+    tbl_stack()%>%
+      add_q()
+}
+
+
+
+multivariate_lm_analysis_m2_foremotionalexhaustion <- function(data, var_to_explain, explanatory_vars) {
+  explanatory_vars %>%
+    map(function(var) {
+      formula_str <- paste0(var_to_explain, " ~ Academic_Efficacy + Cynicism + Warwick_Edinburg_total + SCOFF_total + ", var)
+      model <- lm(formula = as.formula(formula_str), data = data)
+      
+      tbl_regression(
+        model,
+        include = all_of(var)  # show only the main tested variable
+      )
+    }) %>%
+    tbl_stack()%>%
+      add_q()
+}
+
+
+
+univariate_clm_analysis <-
+  function(data, var_to_explain, explanatory_vars){
+    explanatory_vars %>%       # begin with variables of interest
+      str_c(paste0(var_to_explain, " ~ "), .) %>%         # combine each variable into formula ("outcome ~ variable of interest")
+      # iterate through each univariate formula
+      map(                               
+        .f = ~clm(                       # pass the formulas one-by-one to glm()
+          formula = as.formula(.x),      # within glm(), the string formula is .x
+          data = data)) %>%       # dataset
+      # tidy up each of the glm regression outputs from above
+      map(
+        .f = ~tbl_regression(
+          .x,
+          exp = T)) %>%
+      tbl_stack()%>%
+      add_q()
+  }
+
+
+multivariate_clm_analysis_m1AgeGender <- function(data, var_to_explain, explanatory_vars) {
+  explanatory_vars %>%
+    map(function(var) {
+      formula_str <- paste0(var_to_explain, " ~ Age + Gender + Current_track + ", var)
+      model <- clm(formula = as.formula(formula_str), data = data)
+      
+      tbl_regression(
+        model,
+        include = all_of(var),  # inclure uniquement la variable d’intérêt
+        exponentiate = TRUE
+      )
+    }) %>%
+    tbl_stack()%>%
+      add_q()
+}
+
+
+
+
+multivariate_clm_analysis_m2Burnout_wellbeing <-
+  function(data, var_to_explain, explanatory_vars) {
+  explanatory_vars %>%
+    map(function(var) {
+      formula_str <- paste0(var_to_explain, " ~ Academic_Efficacy + Cynicism + Emotional_Exhaustion + Warwick_Edinburg_total + ", var)
+      model <- clm(formula = as.formula(formula_str), data = data)
+      
+      tbl_regression(
+        model,
+        include = all_of(var),  # inclure uniquement la variable d’intérêt
+        exponentiate = TRUE
+      )
+    }) %>%
+    tbl_stack() %>%
+      add_q()
+}
+
+
+
+
+```
+
+
+
+```{r regression SCOFF}
+clm_univariateSCOFF <-
+  univariate_clm_analysis(data = Reponse_EBE_P1_for_regression_recoded, 
+                        var_to_explain = "SCOFF_total", 
+                        explanatory_vars =
+                          colnames(
+                            Reponse_EBE_P1_for_regression_recoded %>%
+                              dplyr::select(-c("SCOFF_total"))))
+
+
+clm_SCOFF_m1 <-
+  multivariate_clm_analysis_m1AgeGender(data = Reponse_EBE_P1_for_regression_recoded, 
+                        var_to_explain = "SCOFF_total", 
+                        explanatory_vars =
+                          colnames(
+                            Reponse_EBE_P1_for_regression_recoded %>%
+                              dplyr::select(-c("SCOFF_total", "Age", "Gender", "Current_track"))))
+
+clm_SCOFF_m2 <-
+  multivariate_clm_analysis_m2Burnout_wellbeing(data = Reponse_EBE_P1_for_regression_recoded, 
+                        var_to_explain = "SCOFF_total", 
+                        explanatory_vars =
+                          colnames(
+                            Reponse_EBE_P1_for_regression_recoded %>%
+                              dplyr::select(-c("SCOFF_total", "Academic_Efficacy", 
+                                               "Cynicism",
+                                   "Emotional_Exhaustion", "Warwick_Edinburg_total"))))
+
+
+tbl_SCOFF_merged <- 
+  tbl_merge(
+  tbls = list(
+    clm_univariateSCOFF,
+    clm_SCOFF_m1,
+    clm_SCOFF_m2
+  ),
+  tab_spanner = c(
+    "**Univariate clm (SCOFF)**",
+    "**Multivariate clm m1: + Age + Gender + Current_track**",
+    "**Multivariate clm m2: + Burnout + Well-being**"
+  )
+)
+
+
+tbl_SCOFF_merged %>%
+  as_tibble() %>%
+  writexl::write_xlsx("./Result/tbl_SCOFF_merged.xlsx")
+
+```
+
+```{r regression SCOFF for radial tree}
+
+univariate_clm_analysis_for_radial <-
+  function(data, var_to_explain, explanatory_vars){
+    explanatory_vars %>%       # begin with variables of interest
+      str_c(paste0(var_to_explain, " ~ "), .) %>%         # combine each variable into formula ("outcome ~ variable of interest")
+      # iterate through each univariate formula
+      map(                               
+        .f = ~clm(                       # pass the formulas one-by-one to glm()
+          formula = as.formula(.x),      # within glm(), the string formula is .x
+          data = data)) %>%       # dataset
+      # tidy up each of the glm regression outputs from above
+      map(
+        .f = ~tbl_regression(
+          .x,
+          exp = T,
+            pvalue_fun = identity)) %>%
+      tbl_stack() %>%
+      add_q()
+  }
+
+Reponse_EBE_P1_for_regression_recoded_for_radial_tree <- 
+  Reponse_EBE_P1_for_regression_recoded %>%
+  mutate(
+    Being_a_female = 
+      ifelse(Gender == "Female", 1, 0),
+    Being_over_21_years_old = 
+      ifelse(Age %in% c("between 21 and 23", "24 years and over"), 1, 0),
+    Baccalaureate_before_2024 = 
+      ifelse(Baccalaureate_Year == "2024", 1, 0),
+    Private_preparation_before_Health_School = 
+      ifelse(Private_preparation_before_Health_School == "Yes", 1, 0),
+    Better_grade_in_Baccalaureate = case_when(
+      Baccalaureate_honors == "No honours" ~ 0,
+      Baccalaureate_honors == "Quite good" ~ 1,
+      Baccalaureate_honors == "Good" ~ 2,
+      Baccalaureate_honors == "Very good" ~ 3,
+      Baccalaureate_honors == "Highest_honours_more_than_18out20" ~ 4,
+      TRUE ~ NA_real_
+    ),
+    Prior_higher_education = ifelse(Prior_higher_education == "Yes", 1, 0),
+    Being_in_PASS = case_when(
+      Current_track == "PASS, Specific Health Access Pathway" ~ 1,
+      Current_track == "LAS, Health Access License" ~ 0,
+      Current_track == "LSPS, Licence Science for Health, unique model in Strasbourg, Reims or Lille Catholique" ~ 0,
+      TRUE ~ NA_real_
+    ),
+    Increased_attendance_in_person_to_class = case_when(
+    Attendance_in_person_to_class == "No" ~ 0,
+    Attendance_in_person_to_class == "Yes to some courses" ~ 1,
+    Attendance_in_person_to_class == "Yes to almost all courses" ~ 2,
+    Attendance_in_person_to_class == "Yes to all courses" ~ 3,
+    TRUE ~ NA_real_
+  ),
+  Increased_weekly_study_time = case_when(
+      Weekly_study_hours == "Less than 15 hours" ~ 0,
+      Weekly_study_hours == "15 to 30 hours" ~ 1,
+      Weekly_study_hours == "30 to 45 hours" ~ 2,
+      Weekly_study_hours == "45 to 60 hours" ~ 3,
+      Weekly_study_hours == "60 to 75 hours" ~ 4,
+      Weekly_study_hours == "More than 75 hours" ~ 5,
+      TRUE ~ NA_real_
+    ),
+    Increased_weekly_leisure_time = case_when(
+      Weekly_hours_leisure_time == "Less than 5 hours" ~ 0,
+      Weekly_hours_leisure_time == "5 to 10 hours" ~ 1,
+      Weekly_hours_leisure_time == "10 to 15 hours" ~ 2,
+      Weekly_hours_leisure_time == "15 to 20 hours" ~ 3,
+      Weekly_hours_leisure_time == "More than 20 hours" ~ 4,
+      TRUE ~ NA_real_
+    ),
+  Increased_regular_physical_activity = case_when(
+  Regular_physical_activity == "No" ~ 0,
+  Regular_physical_activity == "Yes, a few times a month" ~ 1,
+  Regular_physical_activity == "Yes, once a week" ~ 2,
+  Regular_physical_activity == "Yes, several times a week" ~ 3,
+  TRUE ~ NA_real_
+),
+ Increased_frequency_all_nighter_study = case_when(
+  All_nighter_study == "Never" ~ 0,
+  All_nighter_study == "Monthly" ~ 1,
+  All_nighter_study == "Weekly" ~ 2,
+  All_nighter_study == "Daily" ~ 3,
+  TRUE ~ NA_real_
+),
+    # Psychiatric history
+    Depression_history = case_when(
+      Psychiatric_history_Depression == "Yes" ~ 1,
+      Psychiatric_history_Depression == "No" ~ 0,
+      TRUE ~ NA_real_
+    ),
+    
+    Anxiety_history = case_when(
+      Psychiatric_history_Anxiety == "Yes" ~ 1,
+      Psychiatric_history_Anxiety == "No" ~ 0,
+      TRUE ~ NA_real_
+    ),
+    
+    Eating_disorder_history = case_when(
+      Psychiatric_history_Eating_disorder == "Yes" ~ 1,
+      Psychiatric_history_Eating_disorder == "No" ~ 0,
+      TRUE ~ NA_real_
+    ),
+    
+    Any_psychiatric_history = case_when(
+      Psychiatric_history_Yes == "Yes" ~ 1,
+      Psychiatric_history_Yes == "No" ~ 0,
+      TRUE ~ NA_real_
+    ),
+  Weight_change_importance = case_when(
+      Weight_change_since_academic_year_beginning == "No difference" ~ 0,
+      Weight_change_since_academic_year_beginning %in% c(
+        "a loss of between 5 and 10% of your body weight",
+        "an increase of between 5 and 10% in your weight"
+      ) ~ 1,
+      Weight_change_since_academic_year_beginning %in% c(
+        "a loss of at least 10% of your body weight",
+        "an increase of at least 10% in your weight"
+      ) ~ 2,
+      TRUE ~ NA_real_
+    ),
+Better_overall_mental_health_status_declared = Overall_mental_health_status,
+Better_overall_physical_health_status_declared = Overall_physical_health_status,
+ Suicidal_thoughts_presence = case_when(
+      Suicidal_thoughts == "No, never" ~ 0,
+      Suicidal_thoughts %in% c(
+        "Yes in my life",
+        "Yes in my life and since the beginning of my university year",
+        "Yes only since the beginning of my university year"
+      ) ~ 1,
+      TRUE ~ NA_real_
+    ),
+Violence_suffered = case_when(
+      Violence_suffered == "No" ~ 0,
+      Violence_suffered == "Yes" ~ 1,
+      TRUE ~ NA_real_
+    ),
+    
+    Violence_type_Discrimination = case_when(
+      Violence_type_Discrimination == "No" ~ 0,
+      Violence_type_Discrimination == "Yes" ~ 1,
+      TRUE ~ NA_real_
+    ),
+    
+    Violence_type_Moral_harassment = case_when(
+      Violence_type_Moral_harassment == "No" ~ 0,
+      Violence_type_Moral_harassment == "Yes" ~ 1,
+      TRUE ~ NA_real_
+    ),
+Being_single= case_when(
+      Marital_status == "Single" ~ 1,
+      Marital_status %in% c("Couple", "Married or civil union", "Widowed") ~ 0,
+      TRUE ~ NA_real_
+    ),
+Living_alone_or_single_housing = case_when(
+      Housing %in% c("Alone in a rental apartment", "Single in CROUS residence") ~ 1,
+      Housing %in% c(
+        "In a group, sharing a flat, as a couple, etc...",
+        "Other",
+        "With friends, family, relatives, etc..."
+      ) ~ 0,
+      TRUE ~ NA_real_
+    ),
+WEMWBS = Warwick_Edinburg_total,
+Better_declared_economic_situation = Economic_situation,
+Increased_distance_home_university = case_when(
+    Distance_home_univversity == "less than 15 minutes" ~ "0",
+    Distance_home_univversity == "between 15 and 30 minutes" ~ "1",
+    Distance_home_univversity == "between 30 minutes and 1 hour" ~ "2",
+    Distance_home_univversity == "between 1h and 1h30" ~ "3",
+    Distance_home_univversity == "more than 1h30" ~ "4",
+    TRUE ~ NA_character_  # catch any unexpected values
+  ),
+Increased_distance_home_university = as.numeric(Increased_distance_home_university),
+ Tutoring = case_when(
+      Tutoring == "No" ~ 0,
+      Tutoring == "Yes" ~ 1,
+      TRUE ~ NA_real_
+    ),
+    Private_preparation = case_when(
+      Private_preparation == "No" ~ 0,
+      Private_preparation == "Yes" ~ 1,
+      TRUE ~ NA_real_
+    ),
+    Having_done_an_academic_pre_entry = case_when(
+      Academic_pre_entry_No == "No" ~ 1,
+      Academic_pre_entry_No == "Yes" ~ 0,
+      TRUE ~ NA_real_
+    ),
+    Scolarship = case_when(
+      Scolarship == "No" ~ 0,
+      Scolarship == "Yes" ~ 1,
+      TRUE ~ NA_real_
+    ),
+    Student_loan = case_when(
+      Student_loan == "No" ~ 0,
+      Student_loan == "Yes" ~ 1,
+      TRUE ~ NA_real_
+    ),
+Student_job_needed = case_when(
+      Student_job_needed == "No" ~ 0,
+      !is.na(Student_job_needed) ~ 1,
+      TRUE ~ NA_real_
+    ),
+   Tutoring_participation_influence = case_when(
+      Tutoring_participation_influence == "Very negative" ~ -2,
+      Tutoring_participation_influence == "Negative" ~ -1,
+      Tutoring_participation_influence == "Neutral" ~ 0,
+      Tutoring_participation_influence == "Positive" ~ 1,
+      Tutoring_participation_influence == "Very positive" ~ 2,
+      TRUE ~ NA_real_
+    ),
+ Private_preparation_influence = case_when(
+      Private_preparation_influence == "Very negative" ~ -2,
+      Private_preparation_influence == "Negative" ~ -1,
+      Private_preparation_influence == "Neutral" ~ 0,
+      Private_preparation_influence == "Positive" ~ 1,
+      Private_preparation_influence == "Very positive" ~ 2,
+      TRUE ~ NA_real_
+    )
+  ) %>%
+  dplyr::rename(Sufficient_information_about_PASS_LAS = Info_sufficiency_PASS_LAS,
+                Being_tutored = Tutoring) %>%
+  select(-Gender, -Age, -Baccalaureate_Year, 
+         -Baccalaureate_honors, -Current_track, 
+         -Attendance_in_person_to_class, -Weekly_study_hours,
+         -Weekly_hours_leisure_time, -Regular_physical_activity, -All_nighter_study,
+         -Psychiatric_history_Depression, -Psychiatric_history_Anxiety, 
+-Psychiatric_history_Eating_disorder, -Psychiatric_history_Eating_disorder,
+-Psychiatric_history_Yes, -Weight_change_since_academic_year_beginning,
+-Overall_mental_health_status, -Overall_physical_health_status,
+-Suicidal_thoughts, -Housing, -Warwick_Edinburg_total,-Tutoring_participation, -Private_preparation_participation,
+-Tutoring_participation_influence, -Private_preparation_influence,
+-Economic_situation, -Marital_status, -Academic_pre_entry_No, 
+-Distance_home_univversity) %>%
+  select(-contains("French_MBI")) %>%
+  select(-contains("Warwick_Edinburgh_")) %>%
+  select(-SCOFF_sup_2_Eating_dirsorder_risk, -SCOFF_Vomit_due_to_full_stomach,
+         -SCOFF_Recent_weight_loss, -SCOFF_Fear_loss_control_eating, -SCOFF_Perceived_overweight_vs_others, -SCOFF_Food_dominates_life)
+
+
+clm_univariateSCOFF_for_radial_tree <-
+  univariate_clm_analysis_for_radial(data = Reponse_EBE_P1_for_regression_recoded_for_radial_tree, 
+                        var_to_explain = "SCOFF_total", 
+                        explanatory_vars =
+                          colnames(
+                            Reponse_EBE_P1_for_regression_recoded_for_radial_tree %>%
+                              dplyr::select(-contains("SCOFF"))))
+
+characteristic_order <- c(
+  # Demographics & Socioeconomic Status
+  "Being a female", "Being over 21 years old", "Student job needed", 
+  "Scolarship", "Student loan", "Better declared economic situation", 
+  "Financial situation concerns",
+
+  # Academic Background
+  "Better grade in Baccalaureate", "Baccalaureate before 2024",
+  "Prior higher education", "Being in PASS",
+
+  # Academic Preparation
+  "Having done an academic pre entry", "Being tutored",
+  "Tutoring participation influence", "Private preparation before Health School", 
+  "Private preparation",  
+  "Private preparation influence",
+
+  # Academic Experience
+  "Sufficient information about PASS LAS",
+  "Sufficient information about studies", "Sufficient information about career",
+  "Sufficient information about reorientation", 
+  "Increased attendance in person to class", "Increased weekly study time",
+
+  # Sleep quality
+  "Sleep quality week", "Sleep quality weekend", 
+  "Increased frequency all nighter study",
+
+  # Lifestyle
+  "Study impact on family life", "Study impact on social life", "Being single",
+  "Increased weekly leisure time", "Living alone or single housing",         
+  "Increased distance home university",
+
+  # Physical Health
+  "Better overall physical health status declared", 
+  "Increased regular physical activity", "Weight change importance",
+
+  # Violence and Discrimination
+  "Violence suffered", "Violence type Discrimination", 
+  "Violence type Moral harassment", "Social isolation",
+
+  # Mental Health
+  "WEMWBS", "Emotional Exhaustion", "Cynicism", "Academic Efficacy", 
+  "MBI SS burnout status", "Better overall mental health status declared", 
+  "Any psychiatric history", "Depression history", 
+  "Anxiety history", "Eating disorder history", "Suicidal thoughts presence"
+)
+
+
+# === DATA PROCESSING ===
+
+clm_univariateSCOFF_for_radial_tree_tibble <- 
+  clm_univariateSCOFF_for_radial_tree %>%
+  as_tibble() %>%
+  dplyr::rename(
+    Characteristic = `**Characteristic**`,
+    OR = `**OR**`,
+    pval = `**p-value**`,
+    adj_p_value = `**q-value**`
+  ) %>%
+  mutate(
+    OR = as.numeric(OR),
+    adj_p_value = as.numeric(adj_p_value),
+    color = case_when(
+      OR > 1 & adj_p_value < 0.05 ~ "#FF6666",
+      OR < 1 & adj_p_value < 0.05 ~ "deepskyblue3",
+      TRUE ~ "grey"
+    ),
+    color_label = case_when(
+      OR > 1 & adj_p_value < 0.05 ~ "OR > 1 & p < 0.05\nIncreased Risk",
+      OR < 1 & adj_p_value < 0.05 ~ "OR < 1 & p < 0.05\nDecreased Risk",
+      TRUE ~ "p ≥ 0.05\nNot significant"
+    ),
+    Outcome = "Eating disorder",
+    Category = case_when(
+      Characteristic %in% c(
+        "Being_a_female", "Being_over_21_years_old", "Student_job_needed", 
+        "Scolarship", "Student_loan", "Better_declared_economic_situation", 
+        "Financial_situation_concerns"
+      ) ~ "Demographics & Socioeconomic Status",
+      
+      Characteristic %in% c(
+        "Better_grade_in_Baccalaureate", "Baccalaureate_before_2024",
+        "Prior_higher_education", "Being_in_PASS"
+      ) ~ "Academic Background",
+      
+      Characteristic %in% c(
+        "Having_done_an_academic_pre_entry", "Being_tutored",
+        "Tutoring_participation_influence", "Private_preparation_before_Health_School", 
+        "Private_preparation", "Private_preparation_influence"
+      ) ~ "Academic Preparation",
+      
+      Characteristic %in% c(
+        "Sufficient_information_about_studies", "Sufficient_information_about_PASS_LAS",
+        "Sufficient_information_about_career", "Sufficient_information_about_reorientation", 
+        "Increased_attendance_in_person_to_class", "Increased_weekly_study_time"
+      ) ~ "Academic Experience",
+      
+      Characteristic %in% c("Sleep_quality_week", "Sleep_quality_weekend", 
+                            "Increased_frequency_all_nighter_study") ~ "Sleep",
+      
+      Characteristic %in% c(
+        "Study_impact_on_family_life", "Study_impact_on_social_life", "Being_single",
+        "Increased_weekly_leisure_time", "Living_alone_or_single_housing", 
+        "Increased_distance_home_university"
+      ) ~ "Lifestyle",
+      
+      Characteristic %in% c(
+        "Better_overall_physical_health_status_declared", 
+        "Increased_regular_physical_activity", "Weight_change_importance"
+      ) ~ "Physical Health",
+      
+      Characteristic %in% c(
+        "Violence_suffered", "Violence_type_Discrimination", 
+        "Violence_type_Moral_harassment", "Social_isolation"
+      ) ~ "Discrimination",
+      
+      Characteristic %in% c(
+        "WEMWBS", "Emotional_Exhaustion", "Cynicism", "Academic_Efficacy", 
+        "MBI_SS_burnout_status", "Better_overall_mental_health_status_declared", 
+        "Any_psychiatric_history", "Depression_history", 
+        "Anxiety_history", "Eating_disorder_history", "Suicidal_thoughts_presence"
+      ) ~ "Mental Health",
+      
+      TRUE ~ "Other"
+    )
+  ) %>%
+  mutate(
+    width = OR,
+    Characteristic = str_replace_all(as.character(Characteristic), "_", " "),
+    Characteristic = factor(Characteristic, levels = characteristic_order)
+  ) %>%
+  arrange(Characteristic)
+
+# === EDGES ===
+View(clm_univariateSCOFF_for_radial_tree_tibble)
+edges <- clm_univariateSCOFF_for_radial_tree_tibble %>%
+  transmute(from = Category, to = Characteristic, width = width, color = color) %>%
+  bind_rows(
+    clm_univariateSCOFF_for_radial_tree_tibble %>%
+      distinct(Outcome, Category) %>%
+      rename(from = Outcome, to = Category)  %>%
+      mutate(width = 1, color = "grey")
+  )
+
+# === GRAPH STRUCTURE ===
+
+graph <- graph_from_data_frame(edges, directed = TRUE)
+
+V(graph)$label <- V(graph)$name
+V(graph)$color <- "lightgrey"
+V(graph)$pval <- NA
+V(graph)$size <- 2
+
+feature_nodes <- V(graph)$name %in% clm_univariateSCOFF_for_radial_tree_tibble$Characteristic
+
+V(graph)$color[feature_nodes] <- clm_univariateSCOFF_for_radial_tree_tibble$color[match(V(graph)$name[feature_nodes], clm_univariateSCOFF_for_radial_tree_tibble$Characteristic)]
+V(graph)$OR[feature_nodes] <- clm_univariateSCOFF_for_radial_tree_tibble$OR[match(V(graph)$name[feature_nodes], clm_univariateSCOFF_for_radial_tree_tibble$Characteristic)]
+V(graph)$size[feature_nodes] <- V(graph)$OR[feature_nodes]
+
+V(graph)$node_type <- case_when(
+  V(graph)$name == "Eating disorder" ~ "central",
+  V(graph)$name %in% clm_univariateSCOFF_for_radial_tree_tibble$Category ~ "category",
+  TRUE ~ "characteristic"
+)
+
+# === LAYOUT ===
+
+layout <- create_layout(graph, layout = 'dendrogram', circular = TRUE)
+
+layout <- layout %>%
+  mutate(
+    node_angle = atan2(y, x) * 180 / pi,
+    hjust = ifelse(node_angle < -90 | node_angle > 90, 1, 0),
+    angle = ifelse(node_angle < -90 | node_angle > 90, node_angle + 180, node_angle),
+    x_adj = ifelse(node_type == "characteristic", x * 1.06, x),
+    y_adj = ifelse(node_type == "characteristic", y * 1.06, y)
+  )
+
+
+# === FINAL PLOT ===
+
+p_ED <- ggraph(layout) +
+  geom_edge_diagonal(aes(width = width, color = I(color))) +
+  
+  geom_node_point(
+    data = function(d) d %>% filter(node_type == "characteristic") %>%
+      left_join(clm_univariateSCOFF_for_radial_tree_tibble %>% 
+                  select(Characteristic, color_label), 
+                by = c("name" = "Characteristic")),
+    aes(size = size, color = color_label)
+  ) +
+  geom_node_point(
+    data = function(d) d %>% filter(node_type == "category"),
+    color = "lightgrey",
+    size = 3
+  ) +
+  geom_node_point(
+    data = function(d) d %>% filter(node_type == "central"),
+    color = "pink",
+    size = 40
+  ) +
+  
+  geom_text(
+    data = layout %>% filter(node_type == "characteristic"),
+    aes(x = x_adj, y = y_adj, label = label, angle = angle, hjust = hjust),
+    size = 5
+  ) +
+  
+  geom_text(
+    data = layout %>% filter(node_type == "category"),
+    aes(x = x, y = y, label = label),
+    size = 3.9,
+    fontface = "bold",
+    hjust = 0.5,
+    vjust = 0.5
+  ) +
+  
+  geom_node_text(
+    data = function(d) d %>% filter(node_type == "central"),
+    aes(label = label),
+    size = 5,
+    fontface = "bold"
+  ) +
+  
+  scale_edge_width(range = c(0.2, 2.5), guide = "none") +
+  
+  scale_color_manual(
+    name = "Association",
+    values = c(
+      "OR > 1 & p < 0.05\nIncreased Risk" = "#FF6666",
+      "OR < 1 & p < 0.05\nDecreased Risk" = "deepskyblue3",
+      "p ≥ 0.05\nNot significant" = "grey"
+    )
+  ) +
+  
+  scale_size_continuous(
+    name = "Odds Ratio",
+    range = c(1, 8)
+  ) +
+  
+  guides(
+    color = guide_legend(order = 1, override.aes = list(size = 4)),
+    size = guide_legend(order = 2)
+  ) +
+  
+  theme_graph(base_family = "sans")
+
+# === FINAL DISPLAY ===
+
+p_radialED <- p_ED + 
+  coord_fixed() +
+  expand_limits(
+    x = c(min(layout$x)*2.32, max(layout$x)*2.32),
+    y = c(min(layout$y)*2.32, max(layout$y)*2.32)
+  ) +
+  theme(plot.margin = margin(40, 40, 40, 40))
+
+p_radialED_nolegend <-
+  p_radialED + theme(legend.position = "none")
+
+ggsave("./Result/Figures/radial_graph_riskofED.png", plot = p_radialED, width = 16, height = 13)
+   ggsave("./Result/Figures/radial_graph_riskofED_nolegend.png", plot = p_radialED_nolegend, width = 16, height = 13)
+
+```
+
+
+
+
+```{r regression Warwick}
+Reponse_EBE_P1_for_regression_recoded$Warwick_Edinburg_total <-
+  as.numeric(Reponse_EBE_P1_for_regression_recoded$Warwick_Edinburg_total )
+
+lm_univariateWE <-
+  univariate_lm_analysis(data = Reponse_EBE_P1_for_regression_recoded, 
+                        var_to_explain = "Warwick_Edinburg_total", 
+                        explanatory_vars =
+                          colnames(
+                            Reponse_EBE_P1_for_regression_recoded %>%
+                              dplyr::select(-c("Warwick_Edinburg_total"))))
+
+
+lm_multivariateWE_m1 <-
+  multivariate_lm_analysis_m1AgeGender(data = Reponse_EBE_P1_for_regression_recoded, 
+                        var_to_explain = "Warwick_Edinburg_total", 
+                        explanatory_vars =
+                          colnames(
+                            Reponse_EBE_P1_for_regression_recoded %>%
+                              dplyr::select(-c("Warwick_Edinburg_total", "Age", "Gender", "Current_track"))))
+
+
+lm_multivariateWE_m2 <-
+  multivariate_lm_analysis_m2_forWarwick_Edinburg_total(data = Reponse_EBE_P1_for_regression_recoded, 
+                        var_to_explain = "Warwick_Edinburg_total", 
+                        explanatory_vars =
+                          colnames(
+                            Reponse_EBE_P1_for_regression_recoded %>%
+                              dplyr::select(-c("SCOFF_total", "Academic_Efficacy", 
+                                               "Cynicism",
+                                   "Emotional_Exhaustion", "Warwick_Edinburg_total"))))
+
+tbl_WE_merged <-
+  tbl_merge(
+  tbls = list(
+    lm_univariateWE,
+    lm_multivariateWE_m1,
+    lm_multivariateWE_m2
+  ),
+  tab_spanner = c("**Univariate lm (Warwick Edinburg)**",
+                  "**Multivariate lm m1: + Age + Gender + Current_track**",
+                  "**Multivariate lm m2: + Burnout + ED**")
+)
+
+tbl_WE_merged %>%
+  as_tibble() %>%
+  writexl::write_xlsx("./Result/tbl_WE_merged.xlsx")
+```
+
+```{r regression WEMWBS for radial tree}
+
+univariate_lm_analysis_radial <-
+  function(data, var_to_explain, explanatory_vars){
+    explanatory_vars %>%       # begin with variables of interest
+      str_c(paste0(var_to_explain, " ~ "), .) %>%         # combine each variable into formula ("outcome ~ variable of interest")
+      # iterate through each univariate formula
+      map(                               
+        .f = ~lm(                       # pass the formulas one-by-one to glm()
+          formula = as.formula(.x),      # within glm(), the string formula is .x
+          data = data)) %>%       # dataset
+      # tidy up each of the glm regression outputs from above
+      map(
+        .f = ~tbl_regression(
+          .x,
+            pvalue_fun = identity)) %>%
+      tbl_stack()%>%
+      add_q()
+  }
+
+Reponse_EBE_P1_for_regression_recoded_for_radial_tree <-
+  Reponse_EBE_P1_for_regression_recoded_for_radial_tree %>%
+  mutate(SCOFF_total = as.numeric(SCOFF_total))
+
+lm_univariateWE_for_radial_tree <-
+  univariate_lm_analysis_radial(data = Reponse_EBE_P1_for_regression_recoded_for_radial_tree, 
+                        var_to_explain = "WEMWBS", 
+                        explanatory_vars =
+                          colnames(
+                            Reponse_EBE_P1_for_regression_recoded_for_radial_tree %>%
+                              dplyr::select(-c("WEMWBS"))))
+
+
+characteristic_order_wemwbs <- c(
+  # Demographics & Socioeconomic Status
+  "Being a female", "Being over 21 years old", "Student job needed", 
+  "Scolarship", "Student loan", "Better declared economic situation", 
+  "Financial situation concerns",
+
+  # Academic Background
+  "Better grade in Baccalaureate", "Baccalaureate before 2024",
+  "Prior higher education", "Being in PASS",
+
+  # Academic Preparation
+  "Having done an academic pre entry", "Being tutored", 
+  "Tutoring participation influence", "Private preparation before Health School", 
+  "Private preparation", "Private preparation influence",
+
+  # Academic Experience
+  "Sufficient information about PASS LAS",
+  "Sufficient information about studies", "Sufficient information about career",
+  "Sufficient information about reorientation", 
+  "Increased attendance in person to class", "Increased weekly study time",
+
+  # Sleep quality
+  "Sleep quality week", "Sleep quality weekend", 
+  "Increased frequency all nighter study",
+
+  # Lifestyle
+  "Study impact on family life", "Study impact on social life", "Being single",
+  "Increased weekly leisure time", "Living alone or single housing",         
+  "Increased distance home university",
+
+  # Physical Health
+  "Better overall physical health status declared", 
+  "Increased regular physical activity", "Weight change importance",
+
+  # Violence and Discrimination
+  "Violence suffered", "Violence type Discrimination", 
+  "Violence type Moral harassment", "Social isolation",
+
+  # Mental Health
+  "SCOFF total", "Emotional Exhaustion", "Cynicism", "Academic Efficacy", 
+  "MBI SS burnout status", "Better overall mental health status declared", 
+  "Any psychiatric history", "Depression history", 
+  "Anxiety history", "Eating disorder history", "Suicidal thoughts presence"
+)
+
+
+lm_univariateWEMWBS_for_radial_tree_tibble <-
+  lm_univariateWE_for_radial_tree %>%
+  as_tibble() %>%
+  dplyr::rename(Characteristic = `**Characteristic**`,
+                Beta = `**Beta**`,
+                pval = `**p-value**`,
+                adj_p_value = `**q-value**`) %>%
+  mutate(Beta = as.numeric(Beta),
+         adj_p_value  = as.numeric(adj_p_value)) %>%
+  mutate(color = case_when(
+    Beta > 0 & adj_p_value < 0.05 ~ "deepskyblue3",
+    Beta < 0 & adj_p_value < 0.05 ~ "#FF6666",
+    TRUE ~ "grey"),
+    
+    color_label = case_when(
+       Beta > 0 & adj_p_value < 0.05 ~ "Beta > 0 & p < 0.05\nBetter mental \nwell-being",
+      Beta < 0 & adj_p_value < 0.05 ~ "Beta < 0 & p < 0.05\nWorse mental \nwell-being",
+      TRUE ~ "p ≥ 0.05\nNot significant"
+  ),
+  Beta = abs(Beta),
+  Outcome = "Mental well-being",
+  Category = case_when(
+     Characteristic %in% c(
+        "Being_a_female", "Being_over_21_years_old", "Student_job_needed", 
+        "Scolarship", "Student_loan", "Better_declared_economic_situation", 
+                "Financial_situation_concerns"
+      ) ~ "Demographics & Socioeconomic Status",
+     
+     Characteristic %in% c(
+     "Better_grade_in_Baccalaureate",
+     "Baccalaureate_before_2024",
+    "Prior_higher_education",
+    "Being_in_PASS"
+      ) ~ "Academic Background",
+
+  Characteristic %in% c(
+    
+            "Having_done_an_academic_pre_entry",
+    "Being_tutored", 
+        "Tutoring_participation_influence",
+        "Private_preparation_before_Health_School", 
+        "Private_preparation", 
+        "Private_preparation_influence"
+      ) ~ "Academic Preparation",
+  
+
+      Characteristic %in% c(
+        "Sufficient_information_about_studies", "Sufficient_information_about_PASS_LAS",
+        "Sufficient_information_about_career",
+        "Sufficient_information_about_reorientation", 
+        "Increased_attendance_in_person_to_class", 
+        "Increased_weekly_study_time"
+      ) ~ "Academic Experience",
+
+  Characteristic %in% c("Sleep_quality_week", "Sleep_quality_weekend", 
+                          "Increased_frequency_all_nighter_study"
+      ) ~ "Sleep",
+  
+  
+      Characteristic %in% c(
+        "Study_impact_on_family_life", 
+        "Study_impact_on_social_life",
+              "Being_single",
+        "Increased_weekly_leisure_time", 
+        "Living_alone_or_single_housing",         
+        "Increased_distance_home_university"
+      ) ~ "Lifestyle",
+
+     Characteristic %in% c(
+        "Better_overall_physical_health_status_declared", 
+        "Increased_regular_physical_activity",
+        "Weight_change_importance"
+      ) ~ "Physical Health",
+
+      Characteristic %in% c(
+        "Violence_suffered", "Violence_type_Discrimination", 
+        "Violence_type_Moral_harassment", "Social_isolation"
+      ) ~ "Discrimination",
+
+      Characteristic %in% c( "SCOFF_total",
+                             "Emotional_Exhaustion", "Cynicism", "Academic_Efficacy", 
+        "MBI_SS_burnout_status",
+                 "Better_overall_mental_health_status_declared", 
+                 "Any_psychiatric_history", 
+                 "Depression_history", 
+        "Anxiety_history", "Eating_disorder_history", 
+        "Suicidal_thoughts_presence"
+      ) ~ "Mental Health",
+      
+      TRUE ~ "Other"
+    )
+      ) %>%
+     mutate(Characteristic = str_replace_all(as.character(Characteristic), "_", " "),
+   Characteristic = factor(Characteristic, levels = characteristic_order_wemwbs)) %>%
+       arrange(Characteristic) %>%
+  mutate(width = Beta)
+
+
+# === EDGES ===
+
+edges <- lm_univariateWEMWBS_for_radial_tree_tibble %>%
+  transmute(from = Category, to = Characteristic, width = width, color = color) %>%
+  bind_rows(
+    lm_univariateWEMWBS_for_radial_tree_tibble %>%
+      distinct(Outcome, Category) %>%
+      rename(from = Outcome, to = Category)  %>%
+      mutate(width = 1, color = "grey")
+  )
+
+# === GRAPH STRUCTURE ===
+
+graph <- graph_from_data_frame(edges, directed = TRUE)
+
+V(graph)$label <- V(graph)$name
+V(graph)$color <- "lightgrey"
+V(graph)$pval <- NA
+V(graph)$size <- 2
+
+feature_nodes <- V(graph)$name %in% lm_univariateWEMWBS_for_radial_tree_tibble$Characteristic
+
+V(graph)$color[feature_nodes] <- lm_univariateWEMWBS_for_radial_tree_tibble$color[match(V(graph)$name[feature_nodes], lm_univariateWEMWBS_for_radial_tree_tibble$Characteristic)]
+V(graph)$Beta[feature_nodes] <- lm_univariateWEMWBS_for_radial_tree_tibble$Beta[match(V(graph)$name[feature_nodes], lm_univariateWEMWBS_for_radial_tree_tibble$Characteristic)]
+V(graph)$size[feature_nodes] <- V(graph)$Beta[feature_nodes]
+
+V(graph)$node_type <- case_when(
+  V(graph)$name == "Mental well-being" ~ "central",
+  V(graph)$name %in% lm_univariateWEMWBS_for_radial_tree_tibble$Category ~ "category",
+  TRUE ~ "characteristic"
+)
+
+# === LAYOUT ===
+
+layout <- create_layout(graph, layout = 'dendrogram', circular = TRUE)
+
+layout <- layout %>%
+  mutate(
+    node_angle = atan2(y, x) * 180 / pi,
+    hjust = ifelse(node_angle < -90 | node_angle > 90, 1, 0),
+    angle = ifelse(node_angle < -90 | node_angle > 90, node_angle + 180, node_angle),
+    x_adj = ifelse(node_type == "characteristic", x * 1.06, x),
+    y_adj = ifelse(node_type == "characteristic", y * 1.06, y)
+  )
+
+
+# === FINAL PLOT ===
+
+p_WEMWBS <- ggraph(layout) +
+  geom_edge_diagonal(aes(width = width, color = I(color))) +
+  
+  geom_node_point(
+    data = function(d) d %>% filter(node_type == "characteristic") %>%
+      left_join(lm_univariateWEMWBS_for_radial_tree_tibble %>% 
+                  select(Characteristic, color_label), 
+                by = c("name" = "Characteristic")),
+    aes(size = size, color = color_label)
+  ) +
+  geom_node_point(
+    data = function(d) d %>% filter(node_type == "category"),
+    color = "lightgrey",
+    size = 3
+  ) +
+  geom_node_point(
+    data = function(d) d %>% filter(node_type == "central"),
+    color = "lightgreen",
+    size = 40
+  ) +
+  
+  geom_text(
+    data = layout %>% filter(node_type == "characteristic"),
+    aes(x = x_adj, y = y_adj, label = label, angle = angle, hjust = hjust),
+    size = 5
+  ) +
+  
+  geom_text(
+    data = layout %>% filter(node_type == "category"),
+    aes(x = x, y = y, label = label),
+    size = 3.9,
+    fontface = "bold",
+    hjust = 0.5,
+    vjust = 0.5
+  ) +
+  
+  geom_node_text(
+    data = function(d) d %>% filter(node_type == "central"),
+    aes(label = label),
+    size = 5,
+    fontface = "bold"
+  ) +
+  
+  scale_edge_width(range = c(0.2, 2.5), guide = "none") +
+  
+  scale_color_manual(
+    name = "Association",
+    values = c(
+      "Beta < 0 & p < 0.05\nWorse mental \nwell-being" = "#FF6666",
+      "Beta > 0 & p < 0.05\nBetter mental \nwell-being" = "deepskyblue3",
+      "p ≥ 0.05\nNot significant" = "grey"
+    )
+  ) +
+  
+  scale_size_continuous(
+    name = "Absolute value of\nbeta coefficient",
+    range = c(1, 8)
+  ) +
+  
+  guides(
+    color = guide_legend(order = 1, override.aes = list(size = 4)),
+    size = guide_legend(order = 2)
+  ) +
+  
+  theme_graph(base_family = "sans")
+
+# === FINAL DISPLAY ===
+
+p_WEMWBSradial <- p_WEMWBS + 
+  coord_fixed() +
+  expand_limits(
+    x = c(min(layout$x)*2.32, max(layout$x)*2.32),
+    y = c(min(layout$y)*2.32, max(layout$y)*2.32)
+  ) +
+  theme(plot.margin = margin(40, 40, 40, 40))
+
+p_WEMWBSradial_nogelend <-
+  p_WEMWBSradial + theme(legend.position = "none")
+
+ggsave("./Result/Figures/radial_graph_WEMWBS.png", plot = p_WEMWBSradial, width = 16, height = 13)
+   ggsave("./Result/Figures/radial_graph_WEMWBS_noelgend.png", plot = p_WEMWBSradial_nogelend, 
+          width = 16, height = 13)
+
+```
+
+
+```{r regression French MBI SS EE}
+
+# S'assurer que la variable est numérique
+Reponse_EBE_P1_for_regression_recoded$Emotional_Exhaustion <-
+  as.numeric(Reponse_EBE_P1_for_regression_recoded$Emotional_Exhaustion)
+
+# Univarié
+lm_univariateEE <-
+  univariate_lm_analysis(data = Reponse_EBE_P1_for_regression_recoded, 
+                         var_to_explain = "Emotional_Exhaustion", 
+                         explanatory_vars =
+                           colnames(
+                             Reponse_EBE_P1_for_regression_recoded %>%
+                               dplyr::select(-c("Emotional_Exhaustion"))))
+
+# Multivarié m1 : ajusté pour Age + Gender + Current_track
+lm_multivariateEE_m1 <-
+  multivariate_lm_analysis_m1AgeGender(data = Reponse_EBE_P1_for_regression_recoded, 
+                                       var_to_explain = "Emotional_Exhaustion", 
+                                       explanatory_vars =
+                                         colnames(
+                                           Reponse_EBE_P1_for_regression_recoded %>%
+                                             dplyr::select(-c("Emotional_Exhaustion", "Age", "Gender", "Current_track"))))
+
+
+
+
+# Multivarié m2 : ajusté pour bien-être & autres dimensions du burnout
+lm_multivariateEE_m2 <-
+  multivariate_lm_analysis_m2_foremotionalexhaustion(data = Reponse_EBE_P1_for_regression_recoded, 
+                                                        var_to_explain = "Emotional_Exhaustion", 
+                                                        explanatory_vars =
+                                                          colnames(
+                                                            Reponse_EBE_P1_for_regression_recoded %>%
+                                                              dplyr::select(-c("SCOFF_total", "Academic_Efficacy", 
+                                                                               "Cynicism",
+                                                                               "Emotional_Exhaustion", "Warwick_Edinburg_total"))))
+
+# Tableau fusionné
+tbl_EE_merged <-
+  tbl_merge(
+    tbls = list(
+      lm_univariateEE,
+      lm_multivariateEE_m1,
+      lm_multivariateEE_m2
+    ),
+    tab_spanner = c("**Univariate lm (Emotional Exhaustion)**",
+                    "**Multivariate lm m1: + Age + Gender + Current_track**",
+                    "**Multivariate lm m2: + Burnout + Well-being**")
+  )
+
+tbl_EE_merged %>%
+  as_tibble() %>%
+  writexl::write_xlsx("./Result/tbl_EE_MBISS_merged.xlsx")
+```
+
+
+
+
+```{r regression French MBI SS CY}
+# S'assurer que la variable est numérique
+Reponse_EBE_P1_for_regression_recoded$Cynicism <-
+  as.numeric(Reponse_EBE_P1_for_regression_recoded$Cynicism)
+
+# Univarié
+lm_univariateCY <-
+  univariate_lm_analysis(data = Reponse_EBE_P1_for_regression_recoded, 
+                         var_to_explain = "Cynicism", 
+                         explanatory_vars =
+                           colnames(
+                             Reponse_EBE_P1_for_regression_recoded %>%
+                               dplyr::select(-c("Cynicism"))))
+
+# Multivarié m1 : ajusté pour Age + Gender + Current_track
+lm_multivariateCY_m1 <-
+  multivariate_lm_analysis_m1AgeGender(data = Reponse_EBE_P1_for_regression_recoded, 
+                                       var_to_explain = "Cynicism", 
+                                       explanatory_vars =
+                                         colnames(
+                                           Reponse_EBE_P1_for_regression_recoded %>%
+                                             dplyr::select(-c("Cynicism", "Age", "Gender", "Current_track"))))
+
+
+  
+
+
+
+
+# Multivarié m2 : ajusté pour bien-être & burnout
+lm_multivariateCY_m2 <-
+  multivariate_lm_analysis_m2_forcynism(data = Reponse_EBE_P1_for_regression_recoded, 
+                                                        var_to_explain = "Cynicism", 
+                                                        explanatory_vars =
+                                                          colnames(
+                                                            Reponse_EBE_P1_for_regression_recoded %>%
+                                                              dplyr::select(-c("SCOFF_total", "Academic_Efficacy",  "Cynicism",  "Emotional_Exhaustion", "Warwick_Edinburg_total"))))
+
+# Tableau fusionné
+tbl_CY_merged <-
+  tbl_merge(
+    tbls = list(
+      lm_univariateCY,
+      lm_multivariateCY_m1,
+      lm_multivariateCY_m2
+    ),
+    tab_spanner = c("**Univariate lm (Cynicism)**",
+                    "**Multivariate lm m1: + Age + Gender + Current_track**",
+                    "**Multivariate lm m2: + Burnout + Well-being**")
+  )
+
+tbl_CY_merged %>%  as_tibble() %>%
+  writexl::write_xlsx("./Result/tbl_cY_MBISS_merged.xlsx")
+```
+
+```{r regression French MBI SS AE}
+# Transformation en numérique
+Reponse_EBE_P1_for_regression_recoded$Academic_Efficacy <-
+  as.numeric(Reponse_EBE_P1_for_regression_recoded$Academic_Efficacy)
+
+# Analyse univariée
+lm_univariate_AE <- univariate_lm_analysis(
+  data = Reponse_EBE_P1_for_regression_recoded,
+  var_to_explain = "Academic_Efficacy",
+  explanatory_vars = colnames(
+    Reponse_EBE_P1_for_regression_recoded %>%
+      dplyr::select(-"Academic_Efficacy")
+  )
+)
+
+# Multivariée m1
+lm_multivariate_AE_m1 <- multivariate_lm_analysis_m1AgeGender(
+  data = Reponse_EBE_P1_for_regression_recoded,
+  var_to_explain = "Academic_Efficacy",
+  explanatory_vars = colnames(
+    Reponse_EBE_P1_for_regression_recoded %>%
+      dplyr::select(-c("Academic_Efficacy", "Age", "Gender", "Current_track"))
+  )
+)
+
+# Multivariée m2
+lm_multivariate_AE_m2 <- multivariate_lm_analysis_m2_for_Academic(
+  data = Reponse_EBE_P1_for_regression_recoded,
+  var_to_explain = "Academic_Efficacy",
+  explanatory_vars = colnames(
+    Reponse_EBE_P1_for_regression_recoded %>%
+      dplyr::select(-c("SCOFF_total", "Academic_Efficacy", 
+                       "Cynicism", "Emotional_Exhaustion", "Warwick_Edinburg_total"))
+  )
+)
+
+# Fusion des tableaux
+tbl_AE_merged <- tbl_merge(
+  tbls = list(
+    lm_univariate_AE,
+    lm_multivariate_AE_m1,
+    lm_multivariate_AE_m2
+  ),
+  tab_spanner = c("**Univariate lm (Academic Efficacy from 'French MBI-SS')**",
+                  "**Multivariate lm m1: + Age + Gender + Current_track**",
+                  "**Multivariate lm m2: + Burnout + Wellbeing**")
+)
+
+tbl_AE_merged  %>%  as_tibble() %>%
+  writexl::write_xlsx("./Result/tbl_AE_MBISS_merged.xlsx")
+
+
+```
+
+
+```{r MBI SS Burnout, fig.width=5, fig.height=3}
+
+
+# EE >14 and CY > 6 and professional/academic efficacy (the equivalent of PA) <23 
+
+# Prepare data
+burnout_summary <- Reponse_EBE_P1_for_regression_recoded %>%
+  count(MBI_SS_burnout_status) %>%
+  mutate(
+    status_label = ifelse(MBI_SS_burnout_status == 1, "Burnout", "No Burnout"),
+    pct = n / sum(n) * 100
+  )
+
+# Create stacked barplot
+ggplot(burnout_summary, aes(x = "", y = pct, fill = status_label)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_text(aes(label = paste0(round(pct, 1), "%")), 
+            position = position_stack(vjust = 0.5), 
+            color = "white", size = 5) +
+  scale_fill_manual(values = c("No Burnout" = "steelblue", "Burnout" = "darkorange")) +
+  labs(
+    title = "Proportion of Participants by Burnout Status (MBI-SS)",
+    x = NULL,
+    y = "Percentage",
+    fill = "Burnout Status"
+  ) +
+  my_theme +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+    coord_flip()
+
+
+```
+
+
+```{r burnout OR}
+
+univariate_binomial_analysis <- function(data, var_to_explain, explanatory_vars) {
+  explanatory_vars %>%
+    str_c(paste0(var_to_explain, " ~ "), .) %>%
+    map(~ glm(
+      formula = as.formula(.x),
+      data = data,
+      family = binomial(link = "logit")
+    )) %>%
+    map(~ tbl_regression(
+      .x,
+      exponentiate = TRUE
+    )) %>%
+    tbl_stack() %>%
+    add_q()
+}
+
+
+multivariate_binomial_analysis_m1AgeGender <- function(data, var_to_explain, explanatory_vars) {
+  explanatory_vars %>%
+    map(function(var) {
+      formula_str <- paste0(var_to_explain, " ~ Age + Gender + Current_track + ", var)
+      model <- glm(formula = as.formula(formula_str), data = data, family = binomial(link = "logit"))
+      
+      tbl_regression(
+        model,
+        include = all_of(var),
+        exponentiate = TRUE
+      )
+    }) %>%
+    tbl_stack() %>%
+    add_q()
+}
+
+
+multivariate_binomial_analysis_m2SCOFF_wellbeing <- function(data, var_to_explain, explanatory_vars) {
+  explanatory_vars %>%
+    map(function(var) {
+      formula_str <- paste0(var_to_explain, " ~ SCOFF_total + Warwick_Edinburg_total + ", var)
+      model <- glm(formula = as.formula(formula_str), data = data, family = binomial(link = "logit"))
+      
+      tbl_regression(
+        model,
+        include = all_of(var),
+        exponentiate = TRUE
+      )
+    }) %>%
+    tbl_stack() %>%
+    add_q()
+}
+
+
+glm_univariate_burnout <- univariate_binomial_analysis(
+  data = Reponse_EBE_P1_for_regression_recoded,
+  var_to_explain = "MBI_SS_burnout_status",
+  explanatory_vars = colnames(
+    Reponse_EBE_P1_for_regression_recoded %>%
+      dplyr::select(-"MBI_SS_burnout_status")
+  )
+)
+
+
+glm_multivariate_burnout_m1 <- multivariate_binomial_analysis_m1AgeGender(
+  data = Reponse_EBE_P1_for_regression_recoded,
+  var_to_explain = "MBI_SS_burnout_status",
+  explanatory_vars = colnames(
+    Reponse_EBE_P1_for_regression_recoded %>%
+      dplyr::select(-c("MBI_SS_burnout_status", "Age", "Gender", "Current_track"))
+  )
+)
+
+glm_multivariate_burnout_m2 <- multivariate_binomial_analysis_m2SCOFF_wellbeing(
+  data = Reponse_EBE_P1_for_regression_recoded,
+  var_to_explain = "MBI_SS_burnout_status",
+  explanatory_vars = colnames(
+    Reponse_EBE_P1_for_regression_recoded %>%
+      dplyr::select(-c("MBI_SS_burnout_status", "SCOFF_total", "Warwick_Edinburg_total"))
+  )
+)
+
+
+tbl_burnout_merged <- tbl_merge(
+  tbls = list(
+    glm_univariate_burnout,
+    glm_multivariate_burnout_m1,
+    glm_multivariate_burnout_m2
+  ),
+  tab_spanner = c(
+    "**Univariate glm (Burnout status)**",
+    "**Multivariate glm m1: + Age + Gender + Current_track**",
+    "**Multivariate glm m2: + SCOFF + Wellbeing**"
+  )
+)
+
+tbl_burnout_merged %>%
+  as_tibble() %>%
+  writexl::write_xlsx("./Result/tbl_burnout_glm_merged.xlsx")
+
+
+```
+
+
+
+
+```{r regression MBISS for radial tree}
+univariate_binomial_analysis_for_radial <- 
+  function(data, var_to_explain, explanatory_vars) {
+  explanatory_vars %>%
+    str_c(paste0(var_to_explain, " ~ "), .) %>%
+    map(~ glm(
+      formula = as.formula(.x),
+      data = data,
+      family = binomial(link = "logit")
+    )) %>%
+    map(~ tbl_regression(
+      .x,
+      exponentiate = TRUE,
+            pvalue_fun = identity
+    )) %>%
+    tbl_stack() %>%
+    add_q()
+}
+
+Reponse_EBE_P1_for_regression_recoded_for_radial_tree <-
+  Reponse_EBE_P1_for_regression_recoded_for_radial_tree %>%
+  mutate(SCOFF_total = as.numeric(SCOFF_total)) %>%
+  dplyr::select(-Emotional_Exhaustion, -Cynicism , -Academic_Efficacy)
+
+binomial_univariateMBISS_for_radial_tree <-
+  univariate_binomial_analysis_for_radial(data = Reponse_EBE_P1_for_regression_recoded_for_radial_tree, 
+                        var_to_explain = "MBI_SS_burnout_status", 
+                        explanatory_vars =
+                          colnames(
+                            Reponse_EBE_P1_for_regression_recoded_for_radial_tree %>%
+                              dplyr::select(-c("MBI_SS_burnout_status"))))
+
+
+
+characteristic_order <- c(
+  # Demographics & Socioeconomic Status
+  "Being a female", "Being over 21 years old", "Student job needed", 
+  "Scolarship", "Student loan", "Better declared economic situation", 
+  "Financial situation concerns",
+
+  # Academic Background
+  "Better grade in Baccalaureate", "Baccalaureate before 2024",
+  "Prior higher education", "Being in PASS",
+
+  # Academic Preparation
+  "Having done an academic pre entry", "Being tutored",
+  "Tutoring participation influence", "Private preparation before Health School", 
+  "Private preparation",  
+  "Private preparation influence",
+
+  # Academic Experience
+  "Sufficient information about PASS LAS",
+  "Sufficient information about studies", "Sufficient information about career",
+  "Sufficient information about reorientation", 
+  "Increased attendance in person to class", "Increased weekly study time",
+
+  # Sleep quality
+  "Sleep quality week", "Sleep quality weekend", 
+  "Increased frequency all nighter study",
+
+  # Lifestyle
+  "Study impact on family life", "Study impact on social life", "Being single",
+  "Increased weekly leisure time", "Living alone or single housing",         
+  "Increased distance home university",
+
+  # Physical Health
+  "Better overall physical health status declared", 
+  "Increased regular physical activity", "Weight change importance",
+
+  # Violence and Discrimination
+  "Violence suffered", "Violence type Discrimination", 
+  "Violence type Moral harassment", "Social isolation",
+
+  # Mental Health
+  "WEMWBS", "SCOFF total", "Better overall mental health status declared", 
+  "Any psychiatric history", "Depression history", 
+  "Anxiety history", "Eating disorder history", "Suicidal thoughts presence"
+)
+
+
+# === DATA PROCESSING ===
+
+binomial_univariateMBISS_for_radial_tree_tibble <- 
+  binomial_univariateMBISS_for_radial_tree %>%
+  as_tibble() %>%
+  dplyr::rename(
+    Characteristic = `**Characteristic**`,
+    OR = `**OR**`,
+    pval = `**p-value**`,
+    adj_p_value = `**q-value**`
+  ) %>%
+  mutate(
+    OR = as.numeric(OR),
+    adj_p_value = as.numeric(adj_p_value),
+    color = case_when(
+      OR > 1 & adj_p_value < 0.05 ~ "#FF6666",
+      OR < 1 & adj_p_value < 0.05 ~ "deepskyblue3",
+      TRUE ~ "grey"
+    ),
+    color_label = case_when(
+      OR > 1 & adj_p_value < 0.05 ~ "OR > 1 & p < 0.05\nIncreased Risk",
+      OR < 1 & adj_p_value < 0.05 ~ "OR < 1 & p < 0.05\nDecreased Risk",
+      TRUE ~ "p ≥ 0.05\nNot significant"
+    ),
+    Outcome = "Burnout",
+    Category = case_when(
+      Characteristic %in% c(
+        "Being_a_female", "Being_over_21_years_old", "Student_job_needed", 
+        "Scolarship", "Student_loan", "Better_declared_economic_situation", 
+        "Financial_situation_concerns"
+      ) ~ "Demographics &\nSocioeconomic Status",
+      
+      Characteristic %in% c(
+        "Better_grade_in_Baccalaureate", "Baccalaureate_before_2024",
+        "Prior_higher_education", "Being_in_PASS"
+      ) ~ "Academic\nBackground",
+      
+      Characteristic %in% c(
+        "Having_done_an_academic_pre_entry", "Being_tutored",
+        "Tutoring_participation_influence", "Private_preparation_before_Health_School", 
+        "Private_preparation", "Private_preparation_influence"
+      ) ~ "Academic\nPreparation",
+      
+      Characteristic %in% c(
+        "Sufficient_information_about_studies", "Sufficient_information_about_PASS_LAS",
+        "Sufficient_information_about_career", "Sufficient_information_about_reorientation", 
+        "Increased_attendance_in_person_to_class", "Increased_weekly_study_time"
+      ) ~ "Academic Experience",
+      
+      Characteristic %in% c("Sleep_quality_week", "Sleep_quality_weekend", 
+                            "Increased_frequency_all_nighter_study") ~ "Sleep",
+      
+      Characteristic %in% c(
+        "Study_impact_on_family_life", "Study_impact_on_social_life", "Being_single",
+        "Increased_weekly_leisure_time", "Living_alone_or_single_housing", 
+        "Increased_distance_home_university"
+      ) ~ "Lifestyle",
+      
+      Characteristic %in% c(
+        "Better_overall_physical_health_status_declared", 
+        "Increased_regular_physical_activity", "Weight_change_importance"
+      ) ~ "Physical Health",
+      
+      Characteristic %in% c(
+        "Violence_suffered", "Violence_type_Discrimination", 
+        "Violence_type_Moral_harassment", "Social_isolation"
+      ) ~ "Discrimination",
+      
+      Characteristic %in% c(
+        "WEMWBS", "SCOFF_total", "Better_overall_mental_health_status_declared", 
+        "Any_psychiatric_history", "Depression_history", 
+        "Anxiety_history", "Eating_disorder_history", "Suicidal_thoughts_presence"
+      ) ~ "Mental\nHealth",
+      
+      TRUE ~ "Other"
+    )
+  ) %>%
+  mutate(
+    width = OR,
+    Characteristic = str_replace_all(as.character(Characteristic), "_", " "),
+    Characteristic = factor(Characteristic, levels = characteristic_order)
+  ) %>%
+  arrange(Characteristic)
+
+
+# === EDGES ===
+
+edges <- binomial_univariateMBISS_for_radial_tree_tibble %>%
+  transmute(from = Category, to = Characteristic, width = width, color = color) %>%
+  bind_rows(
+    binomial_univariateMBISS_for_radial_tree_tibble %>%
+      distinct(Outcome, Category) %>%
+      rename(from = Outcome, to = Category)  %>%
+      mutate(width = 1, color = "grey")
+  )
+
+
+
+# === GRAPH STRUCTURE ===
+
+graph <- graph_from_data_frame(edges, directed = TRUE)
+
+V(graph)$label <- V(graph)$name
+V(graph)$color <- "lightgrey"
+V(graph)$pval <- NA
+V(graph)$size <- 2
+
+feature_nodes <- V(graph)$name %in% binomial_univariateMBISS_for_radial_tree_tibble$Characteristic
+
+V(graph)$color[feature_nodes] <- binomial_univariateMBISS_for_radial_tree_tibble$color[match(V(graph)$name[feature_nodes], binomial_univariateMBISS_for_radial_tree_tibble$Characteristic)]
+V(graph)$OR[feature_nodes] <- binomial_univariateMBISS_for_radial_tree_tibble$OR[match(V(graph)$name[feature_nodes], binomial_univariateMBISS_for_radial_tree_tibble$Characteristic)]
+V(graph)$size[feature_nodes] <- V(graph)$OR[feature_nodes]
+
+V(graph)$node_type <- case_when(
+  V(graph)$name == "Burnout" ~ "central",
+  V(graph)$name %in% binomial_univariateMBISS_for_radial_tree_tibble$Category ~ "category",
+  TRUE ~ "characteristic"
+)
+
+# === LAYOUT ===
+
+layout <- create_layout(graph, layout = 'dendrogram', circular = TRUE)
+
+layout <- layout %>%
+  mutate(
+    node_angle = atan2(y, x) * 180 / pi,
+    hjust = ifelse(node_angle < -90 | node_angle > 90, 1, 0),
+    angle = ifelse(node_angle < -90 | node_angle > 90, node_angle + 180, node_angle),
+    x_adj = ifelse(node_type == "characteristic", x * 1.06, x),
+    y_adj = ifelse(node_type == "characteristic", y * 1.06, y)
+  )
+
+
+# === FINAL PLOT ===
+
+p_burnout <- ggraph(layout) +
+  geom_edge_diagonal(aes(width = width, color = I(color))) +
+  
+  geom_node_point(
+    data = function(d) d %>% filter(node_type == "characteristic") %>%
+      left_join(binomial_univariateMBISS_for_radial_tree_tibble %>% 
+                  select(Characteristic, color_label), 
+                by = c("name" = "Characteristic")),
+    aes(size = size, color = color_label)
+  ) +
+  geom_node_point(
+    data = function(d) d %>% filter(node_type == "category"),
+    color = "lightgrey",
+    size = 3
+  ) +
+  geom_node_point(
+    data = function(d) d %>% filter(node_type == "central"),
+    color = "darkblue",
+    size = 40
+  ) +
+  
+  geom_text(
+    data = layout %>% filter(node_type == "characteristic"),
+    aes(x = x_adj, y = y_adj, label = label, angle = angle, hjust = hjust),
+    size = 5
+  ) +
+  
+  geom_text(
+    data = layout %>% filter(node_type == "category"),
+    aes(x = x, y = y, label = label),
+    size = 3.9,
+    fontface = "bold",
+    hjust = 0.5,
+    vjust = 0.5
+  ) +
+  
+  geom_node_text(
+    data = function(d) d %>% filter(node_type == "central"),
+    aes(label = label),
+    size = 5,
+    fontface = "bold",
+    color = "white"
+  ) +
+  
+  scale_edge_width(range = c(0.2, 2.5), guide = "none") +
+  
+  scale_color_manual(
+    name = "Association",
+    values = c(
+      "OR > 1 & p < 0.05\nIncreased Risk" = "#FF6666",
+      "OR < 1 & p < 0.05\nDecreased Risk" = "deepskyblue3",
+      "p ≥ 0.05\nNot significant" = "grey"
+    )
+  ) +
+  
+  scale_size_continuous(
+    name = "Odds Ratio",
+    range = c(1, 8)
+  ) +
+  
+  guides(
+    color = guide_legend(order = 1, override.aes = list(size = 4)),
+    size = guide_legend(order = 2)
+  ) +
+  
+  theme_graph(base_family = "sans")
+
+# === FINAL DISPLAY ===
+
+p_burnout_radial <- p_burnout + 
+  coord_fixed() +
+  expand_limits(
+    x = c(min(layout$x)*2.32, max(layout$x)*2.32),
+    y = c(min(layout$y)*2.32, max(layout$y)*2.32)
+  ) 
+
+p_burnout_radial_nolgend <-
+  p_burnout_radial + theme(legend.position = "none")
+
+ggsave("./Result/Figures/radial_graph_riskofburnout.png", plot = p_burnout_radial, width = 16, height = 13)
+
+ggsave("./Result/Figures/radial_graph_riskofburnout_noelgend.png", plot = p_burnout_radial_nolgend, width = 16, height = 13)
+
+```
+
+
+```{r session info}
+sessionInfo()
+
+```
+

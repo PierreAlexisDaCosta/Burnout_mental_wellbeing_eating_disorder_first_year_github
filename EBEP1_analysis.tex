@@ -1,0 +1,2454 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={EBEP1},
+  pdfauthor={Pierre-Alexis Da Costa},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{EBEP1}
+\author{Pierre-Alexis Da Costa}
+\date{2025-06-01}
+
+\begin{document}
+\maketitle
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(readxl)}
+\FunctionTok{library}\NormalTok{(writexl)}
+\FunctionTok{library}\NormalTok{(tidyr)}
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## -- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --
+## v dplyr     1.1.4     v purrr     1.0.2
+## v forcats   1.0.0     v readr     2.1.5
+## v ggplot2   3.5.1     v stringr   1.5.1
+## v lubridate 1.9.3     v tibble    3.2.1
+## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+## i Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(gtsummary)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## #BlackLivesMatter
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggforce)}
+\FunctionTok{library}\NormalTok{(stringr)}
+\FunctionTok{library}\NormalTok{(UpSetR)}
+\FunctionTok{library}\NormalTok{(forcats)}
+\FunctionTok{library}\NormalTok{(broom)}
+
+\FunctionTok{library}\NormalTok{(scales)  }\CommentTok{\# pour percent\_format()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attachement du package : 'scales'
+## 
+## L'objet suivant est masqué depuis 'package:purrr':
+## 
+##     discard
+## 
+## L'objet suivant est masqué depuis 'package:readr':
+## 
+##     col_factor
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggtext)}
+\FunctionTok{library}\NormalTok{(GGally)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Registered S3 method overwritten by 'GGally':
+##   method from   
+##   +.gg   ggplot2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(UpSetR)}
+\FunctionTok{library}\NormalTok{(RColorBrewer)}
+\FunctionTok{library}\NormalTok{(purrr)}
+
+
+\NormalTok{my\_theme }\OtherTok{\textless{}{-}} 
+  \FunctionTok{theme}\NormalTok{( }
+  \AttributeTok{panel.background =} \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{fill =} \StringTok{"white"}\NormalTok{),}
+  \AttributeTok{axis.line =} \FunctionTok{element\_line}\NormalTok{(}\AttributeTok{color =} \StringTok{"grey90"}\NormalTok{),}
+  \AttributeTok{legend.position =} \StringTok{"top"}\NormalTok{,}
+  \AttributeTok{legend.title =} \FunctionTok{element\_blank}\NormalTok{(),}
+  \AttributeTok{strip.background =} \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{fill =} \StringTok{"grey30"}\NormalTok{),}
+  \AttributeTok{strip.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{colour =} \StringTok{"white"}\NormalTok{),}
+  \AttributeTok{text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{)}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{1. Description}\label{description}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Correspondance\_EBEP1\_2025 }\OtherTok{\textless{}{-}}
+\NormalTok{  readxl}\SpecialCharTok{::}\FunctionTok{read\_excel}\NormalTok{(}\StringTok{"./Raw\_data/Correspondance\_EBEP1\_2025.xlsx"}\NormalTok{)}
+
+
+\NormalTok{Recode\_of\_every\_possible\_answer }\OtherTok{\textless{}{-}}
+\NormalTok{  readxl}\SpecialCharTok{::}\FunctionTok{read\_excel}\NormalTok{(}\StringTok{"./Raw\_data/Recode\_of\_every\_possible\_answer.xlsx"}\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_pre\_filtered }\OtherTok{\textless{}{-}}
+\NormalTok{  readxl}\SpecialCharTok{::}\FunctionTok{read\_excel}\NormalTok{(}\StringTok{"./Raw\_data/Survey\_result.xlsx"}\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1 }\OtherTok{\textless{}{-}} 
+\NormalTok{  Reponse\_EBE\_P1\_pre\_filtered[, (}\FunctionTok{colnames}\NormalTok{(Reponse\_EBE\_P1\_pre\_filtered) }\SpecialCharTok{\%in\%} 
+\NormalTok{                                   Correspondance\_EBEP1\_2025}\SpecialCharTok{$}\NormalTok{Nom)]}
+
+\CommentTok{\# Créer un vecteur de correspondance entre les noms et les codes}
+\NormalTok{correspondance }\OtherTok{\textless{}{-}} \FunctionTok{setNames}\NormalTok{(Correspondance\_EBEP1\_2025}\SpecialCharTok{$}\NormalTok{Code, Correspondance\_EBEP1\_2025}\SpecialCharTok{$}\NormalTok{Nom)}
+
+\CommentTok{\# Copier le dataframe d\textquotesingle{}origine}
+\NormalTok{Reponse\_EBE\_P1\_recode }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1}
+
+\CommentTok{\# Remplacer les noms de colonnes si correspondance trouvée}
+\FunctionTok{colnames}\NormalTok{(Reponse\_EBE\_P1\_recode) }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(}
+  \FunctionTok{colnames}\NormalTok{(Reponse\_EBE\_P1\_recode) }\SpecialCharTok{\%in\%} \FunctionTok{names}\NormalTok{(correspondance),}
+\NormalTok{  correspondance[}\FunctionTok{colnames}\NormalTok{(Reponse\_EBE\_P1\_recode)],}
+  \FunctionTok{colnames}\NormalTok{(Reponse\_EBE\_P1\_recode)  }\CommentTok{\# laisser inchangé sinon}
+\NormalTok{)}
+
+
+\CommentTok{\# Fonction de recodage d\textquotesingle{}une colonne}
+\NormalTok{recode\_2024 }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x) \{}
+\NormalTok{  x }\OtherTok{\textless{}{-}} \FunctionTok{as.character}\NormalTok{(x)  }\CommentTok{\# au cas où ce serait numérique}
+\NormalTok{  x[x }\SpecialCharTok{==} \StringTok{"2024.0"}\NormalTok{] }\OtherTok{\textless{}{-}} \StringTok{"2024"}
+  \FunctionTok{return}\NormalTok{(x)}
+\NormalTok{\}}
+
+\CommentTok{\# Appliquer à tout le dataframe (par exemple Reponse\_EBE\_P1)}
+\NormalTok{Reponse\_EBE\_P1\_recode }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{lapply}\NormalTok{(Reponse\_EBE\_P1\_recode, recode\_2024), }\AttributeTok{stringsAsFactors =} \ConstantTok{FALSE}\NormalTok{)}
+
+\CommentTok{\# \# Step 1: Get all unique answers from Reponse\_EBE\_P1}
+\CommentTok{\# all\_answers \textless{}{-} unique(unlist(Reponse\_EBE\_P1))}
+\CommentTok{\# }
+\CommentTok{\# \# Step 2: Check which answers are NOT in the recode list}
+\CommentTok{\# unknown\_answers \textless{}{-} setdiff(all\_answers, Recode\_of\_every\_possible\_answer$reponse\_possible)}
+\CommentTok{\# }
+\CommentTok{\# if(length(unknown\_answers) \textgreater{} 0) \{}
+\CommentTok{\#   cat("These answers have no recoding (not found in recode list):\textbackslash{}n")}
+\CommentTok{\#   print(unknown\_answers)}
+\CommentTok{\# \} else \{}
+\CommentTok{\#   cat("All answers found in the recode list. Proceeding with recoding...\textbackslash{}n")}
+\CommentTok{\# \}}
+
+\CommentTok{\# Step 3: Create a named vector for recoding for fast lookup}
+\NormalTok{recode\_vector }\OtherTok{\textless{}{-}} 
+  \FunctionTok{setNames}\NormalTok{(Recode\_of\_every\_possible\_answer}\SpecialCharTok{$}\NormalTok{translation, }
+\NormalTok{           Recode\_of\_every\_possible\_answer}\SpecialCharTok{$}\NormalTok{reponse\_possible)}
+
+\CommentTok{\# Step 4: Replace answers by translation in the whole dataframe}
+\CommentTok{\# This will replace only known answers; unknown will become NA or stay same if you prefer}
+
+\NormalTok{Reponse\_EBE\_P1\_final }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}
+  \FunctionTok{lapply}\NormalTok{(Reponse\_EBE\_P1\_recode, }\ControlFlowTok{function}\NormalTok{(col) \{}
+    \CommentTok{\# Replace values by recode\_vector if found, otherwise keep original or NA}
+\NormalTok{    recoded\_col }\OtherTok{\textless{}{-}}\NormalTok{ recode\_vector[}\FunctionTok{as.character}\NormalTok{(col)]}
+    \CommentTok{\# Optional: keep original if not found}
+\NormalTok{    recoded\_col[}\FunctionTok{is.na}\NormalTok{(recoded\_col)] }\OtherTok{\textless{}{-}} \FunctionTok{as.character}\NormalTok{(col)[}\FunctionTok{is.na}\NormalTok{(recoded\_col)]}
+    \FunctionTok{return}\NormalTok{(recoded\_col)}
+\NormalTok{  \}),}
+  \AttributeTok{stringsAsFactors =} \ConstantTok{FALSE}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_final }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{lapply}\NormalTok{(Reponse\_EBE\_P1\_final, recode\_2024), }\AttributeTok{stringsAsFactors =} \ConstantTok{FALSE}\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  writexl}\SpecialCharTok{::}\FunctionTok{write\_xlsx}\NormalTok{(}\StringTok{"./Preprocessed\_data/Reponse\_EBE\_P1\_final.xlsx"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{HAD\_correspondance }\OtherTok{\textless{}{-}}
+\NormalTok{  Correspondance\_EBEP1\_2025 }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Echelle }\SpecialCharTok{==} \StringTok{"HAD"}\NormalTok{) }
+
+\NormalTok{HAD\_correspondance}\SpecialCharTok{$}\NormalTok{Nom\_anglais }\OtherTok{\textless{}{-}}
+  \FunctionTok{str\_remove\_all}\NormalTok{(HAD\_correspondance}\SpecialCharTok{$}\NormalTok{Nom\_anglais, }\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{[|}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{]"}\NormalTok{)}
+\NormalTok{HAD\_correspondance}\SpecialCharTok{$}\NormalTok{Nom\_anglais }\OtherTok{\textless{}{-}}
+  \FunctionTok{str\_remove\_all}\NormalTok{(HAD\_correspondance}\SpecialCharTok{$}\NormalTok{Nom\_anglais, }\StringTok{"HAD "}\NormalTok{)}
+\NormalTok{HAD\_correspondance}\SpecialCharTok{$}\NormalTok{Nom\_anglais }\OtherTok{\textless{}{-}}
+  \FunctionTok{str\_replace\_all}\NormalTok{(HAD\_correspondance}\SpecialCharTok{$}\NormalTok{Nom\_anglais, }\StringTok{\textquotesingle{}"wound up"\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}wound up\textquotesingle{}}\NormalTok{)}
+
+
+\NormalTok{HAD\_Reponse\_EBE\_P1\_final }\OtherTok{\textless{}{-}}
+\NormalTok{  Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{contains}\NormalTok{(}\StringTok{"HAD"}\NormalTok{))}
+
+\CommentTok{\# Score Calcul \#\#\#\#}
+\NormalTok{HAD\_Reponse\_EBE\_P1\_final\_for\_score }\OtherTok{\textless{}{-}}\NormalTok{ HAD\_Reponse\_EBE\_P1\_final}
+
+
+\CommentTok{\# Plot HAD \#\#\#\#}
+\CommentTok{\# Récupérer les noms actuels des colonnes}
+\NormalTok{old\_names }\OtherTok{\textless{}{-}} \FunctionTok{colnames}\NormalTok{(HAD\_Reponse\_EBE\_P1\_final)}
+
+\CommentTok{\# Créer un vecteur de nouveaux noms, en cherchant correspondance dans HAD\_correspondance}
+\NormalTok{new\_names }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(old\_names, }\ControlFlowTok{function}\NormalTok{(x) \{}
+\NormalTok{  idx }\OtherTok{\textless{}{-}} \FunctionTok{which}\NormalTok{(HAD\_correspondance}\SpecialCharTok{$}\NormalTok{Code }\SpecialCharTok{==}\NormalTok{ x)}
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{length}\NormalTok{(idx) }\SpecialCharTok{==} \DecValTok{1}\NormalTok{) \{}
+    \FunctionTok{return}\NormalTok{(HAD\_correspondance}\SpecialCharTok{$}\NormalTok{Nom\_anglais[idx])}
+\NormalTok{  \} }\ControlFlowTok{else}\NormalTok{ \{}
+    \CommentTok{\# Si pas de correspondance, on garde le nom original}
+    \FunctionTok{return}\NormalTok{(x)}
+\NormalTok{  \}}
+\NormalTok{\})}
+
+\CommentTok{\# Appliquer les nouveaux noms}
+\FunctionTok{colnames}\NormalTok{(HAD\_Reponse\_EBE\_P1\_final) }\OtherTok{\textless{}{-}}\NormalTok{ new\_names}
+
+
+\NormalTok{HAD\_Reponse\_EBE\_P1\_final\_long }\OtherTok{\textless{}{-}}\NormalTok{ HAD\_Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{pivot\_longer}\NormalTok{(}
+      \AttributeTok{cols =} \FunctionTok{everything}\NormalTok{(),}
+      \AttributeTok{names\_to =} \StringTok{"Question"}\NormalTok{,}
+      \AttributeTok{values\_to =} \StringTok{"Response"}
+\NormalTok{    )}
+  
+\NormalTok{HAD\_Reponse\_EBE\_P1\_final\_summary }\OtherTok{\textless{}{-}}\NormalTok{ HAD\_Reponse\_EBE\_P1\_final\_long }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{group\_by}\NormalTok{(Question, Response) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{summarise}\NormalTok{(}\AttributeTok{n =} \FunctionTok{n}\NormalTok{(), }\AttributeTok{.groups =} \StringTok{"drop"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{group\_by}\NormalTok{(Question) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{mutate}\NormalTok{(}\AttributeTok{percent =}\NormalTok{ n }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(n))}
+  
+\CommentTok{\# Forcer l\textquotesingle{}ordre des modalités}
+\NormalTok{HAD\_Reponse\_EBE\_P1\_final\_summary }\OtherTok{\textless{}{-}}\NormalTok{ HAD\_Reponse\_EBE\_P1\_final\_summary }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Response =} \FunctionTok{factor}\NormalTok{(Response, }\AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"3 Most of the time"}\NormalTok{, }\StringTok{"2 Often"}\NormalTok{, }\StringTok{"1 From time to time"}\NormalTok{, }\StringTok{"0 Never"}\NormalTok{)))}
+
+\NormalTok{HAD\_Reponse\_EBE\_P1\_final\_summary}\SpecialCharTok{$}\NormalTok{Response }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{levels}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "3 Most of the time"  "2 Often"             "1 From time to time"
+## [4] "0 Never"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Calculer la somme de 0 et 1 par question pour mettre en gras si \textgreater{} 50\%}
+\NormalTok{bold\_questions }\OtherTok{\textless{}{-}}\NormalTok{ HAD\_Reponse\_EBE\_P1\_final\_summary }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Response }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\StringTok{"0 Never"}\NormalTok{, }\StringTok{"1 From time to time"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Question) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{sum\_percent =} \FunctionTok{sum}\NormalTok{(percent)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(sum\_percent }\SpecialCharTok{\textgreater{}} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pull}\NormalTok{(Question)}
+
+\CommentTok{\# Ajouter une colonne pour label en gras ou non}
+\NormalTok{HAD\_Reponse\_EBE\_P1\_final\_summary }\OtherTok{\textless{}{-}}\NormalTok{ HAD\_Reponse\_EBE\_P1\_final\_summary }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{bold\_label =} \FunctionTok{ifelse}\NormalTok{(Question }\SpecialCharTok{\%in\%}\NormalTok{ bold\_questions, }\ConstantTok{TRUE}\NormalTok{, }\ConstantTok{FALSE}\NormalTok{))}
+
+\CommentTok{\# Préparer les labels pour afficher les \% dans les barres (en \% arrondi)}
+\NormalTok{HAD\_Reponse\_EBE\_P1\_final\_summary }\OtherTok{\textless{}{-}}\NormalTok{ HAD\_Reponse\_EBE\_P1\_final\_summary }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{percent\_label =} \FunctionTok{ifelse}\NormalTok{(percent }\SpecialCharTok{\textgreater{}} \FloatTok{0.02}\NormalTok{, }\FunctionTok{paste0}\NormalTok{(}\FunctionTok{round}\NormalTok{(percent}\SpecialCharTok{*}\DecValTok{100}\NormalTok{), }\StringTok{"\%"}\NormalTok{), }\StringTok{""}\NormalTok{))  }\CommentTok{\# n\textquotesingle{}affiche que si \textgreater{} 2\%}
+
+
+
+\CommentTok{\# Define a gradient palette from light to dark blue (for example)}
+\NormalTok{my\_palette\_HAD }\OtherTok{\textless{}{-}}\NormalTok{ scales}\SpecialCharTok{::}\FunctionTok{gradient\_n\_pal}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"lightblue"}\NormalTok{, }\StringTok{"dodgerblue"}\NormalTok{, }\StringTok{"blue"}\NormalTok{, }\StringTok{"darkblue"}\NormalTok{))}
+
+\CommentTok{\# Generate 4 colors evenly spaced on the gradient}
+\NormalTok{colors\_HAD }\OtherTok{\textless{}{-}} \FunctionTok{my\_palette\_HAD}\NormalTok{(}\FunctionTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, }\AttributeTok{length.out =} \DecValTok{4}\NormalTok{))}
+
+
+\FunctionTok{ggplot}\NormalTok{(HAD\_Reponse\_EBE\_P1\_final\_summary, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Question, }\AttributeTok{y =}\NormalTok{ percent, }\AttributeTok{fill =}\NormalTok{ Response)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{, }\AttributeTok{position =} \StringTok{"fill"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_text}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label =}\NormalTok{ percent\_label),}
+            \AttributeTok{position =} \FunctionTok{position\_fill}\NormalTok{(}\AttributeTok{vjust =} \FloatTok{0.5}\NormalTok{),}
+            \AttributeTok{color =} \StringTok{"white"}\NormalTok{,}
+            \AttributeTok{size =} \DecValTok{3}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept =} \FloatTok{0.5}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{color =} \StringTok{"black"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_flip}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\FunctionTok{percent\_format}\NormalTok{()) }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_manual}\NormalTok{(}\AttributeTok{values =}\NormalTok{ colors\_HAD) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Distribution of HAD responses by question"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Question"}\NormalTok{,}
+       \AttributeTok{y =} \StringTok{"Percentage"}\NormalTok{,}
+       \AttributeTok{fill =} \StringTok{"Response"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/calcul score HAD-1.pdf}
+Due to a technical error, we cannot compute a score for HAD.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Filtrer la correspondance pour l\textquotesingle{}échelle Warwick{-}Edinburgh}
+\NormalTok{Warwick\_correspondance }\OtherTok{\textless{}{-}}\NormalTok{ Correspondance\_EBEP1\_2025 }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Echelle }\SpecialCharTok{==} \StringTok{"Warwick\_Edinburgh"}\NormalTok{)}
+
+\CommentTok{\# Sélectionner uniquement les colonnes liées à Warwick dans les réponses}
+\NormalTok{WE\_Reponse\_EBE\_P1\_final }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{contains}\NormalTok{(}\StringTok{"Warwick\_Edinburgh"}\NormalTok{))}
+
+
+\NormalTok{WE\_Reponse\_EBE\_P1\_final\_for\_score }\OtherTok{\textless{}{-}}\NormalTok{ WE\_Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{everything}\NormalTok{(), }\SpecialCharTok{\textasciitilde{}}\NormalTok{ \{}
+    \CommentTok{\# Retirer tous les caractères sauf chiffres, signes négatifs et points (virgules selon besoin)}
+\NormalTok{    cleaned }\OtherTok{\textless{}{-}} \FunctionTok{str\_replace\_all}\NormalTok{(}\FunctionTok{as.character}\NormalTok{(.), }\StringTok{"[\^{}0{-}9.{-}]"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+    \CommentTok{\# Convertir en numérique}
+    \FunctionTok{as.numeric}\NormalTok{(cleaned)}
+\NormalTok{  \}))}
+
+
+\NormalTok{WE\_Reponse\_EBE\_P1\_final\_score }\OtherTok{\textless{}{-}}
+\NormalTok{  WE\_Reponse\_EBE\_P1\_final\_for\_score }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{rowSums}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{as.data.frame}\NormalTok{()}
+
+\FunctionTok{colnames}\NormalTok{(WE\_Reponse\_EBE\_P1\_final\_score) }\OtherTok{\textless{}{-}} \StringTok{"Warwick\_Edinburg\_total"}
+
+\CommentTok{\# Renommage des colonnes avec noms anglais (si disponibles)}
+\NormalTok{old\_names }\OtherTok{\textless{}{-}} \FunctionTok{colnames}\NormalTok{(WE\_Reponse\_EBE\_P1\_final)}
+
+\NormalTok{new\_names }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(old\_names, }\ControlFlowTok{function}\NormalTok{(x) \{}
+\NormalTok{  idx }\OtherTok{\textless{}{-}} \FunctionTok{which}\NormalTok{(Warwick\_correspondance}\SpecialCharTok{$}\NormalTok{Code }\SpecialCharTok{==}\NormalTok{ x)}
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{length}\NormalTok{(idx) }\SpecialCharTok{==} \DecValTok{1}\NormalTok{) \{}
+    \FunctionTok{return}\NormalTok{(Warwick\_correspondance}\SpecialCharTok{$}\NormalTok{Nom\_anglais[idx])}
+\NormalTok{  \} }\ControlFlowTok{else}\NormalTok{ \{}
+    \FunctionTok{return}\NormalTok{(x)}
+\NormalTok{  \}}
+\NormalTok{\})}
+
+\FunctionTok{colnames}\NormalTok{(WE\_Reponse\_EBE\_P1\_final) }\OtherTok{\textless{}{-}}\NormalTok{ new\_names}
+
+\CommentTok{\# Passage en format long}
+\NormalTok{WE\_Reponse\_EBE\_P1\_final\_long }\OtherTok{\textless{}{-}}\NormalTok{ WE\_Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}
+    \AttributeTok{cols =} \FunctionTok{everything}\NormalTok{(),}
+    \AttributeTok{names\_to =} \StringTok{"Question"}\NormalTok{,}
+    \AttributeTok{values\_to =} \StringTok{"Response"}
+\NormalTok{  )}
+
+\CommentTok{\# Résumé des réponses}
+\NormalTok{WE\_Reponse\_EBE\_P1\_final\_summary }\OtherTok{\textless{}{-}}\NormalTok{ WE\_Reponse\_EBE\_P1\_final\_long }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Question, Response) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{n =} \FunctionTok{n}\NormalTok{(), }\AttributeTok{.groups =} \StringTok{"drop"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Question) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{percent =}\NormalTok{ n }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(n))}
+
+
+\CommentTok{\# Définir l’ordre des modalités de réponse typiques WEMWBS (à adapter selon ton codage réel)}
+
+
+\NormalTok{WE\_Reponse\_EBE\_P1\_final\_summary }\OtherTok{\textless{}{-}}\NormalTok{ WE\_Reponse\_EBE\_P1\_final\_summary }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Response =} \FunctionTok{factor}\NormalTok{(Response,}
+                           \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"5 All the time"}\NormalTok{, }\StringTok{"4 Often"}\NormalTok{, }\StringTok{"3 Sometimes"}\NormalTok{, }\StringTok{"2 Rarely"}\NormalTok{, }\StringTok{"1 never"}\NormalTok{)))}
+
+
+\NormalTok{WE\_Reponse\_EBE\_P1\_final\_summary }\OtherTok{\textless{}{-}}\NormalTok{ WE\_Reponse\_EBE\_P1\_final\_summary }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{bold\_label =} \FunctionTok{ifelse}\NormalTok{(Question }\SpecialCharTok{\%in\%}\NormalTok{ bold\_questions, }\ConstantTok{TRUE}\NormalTok{, }\ConstantTok{FALSE}\NormalTok{),}
+         \AttributeTok{percent\_label =} \FunctionTok{ifelse}\NormalTok{(percent }\SpecialCharTok{\textgreater{}} \FloatTok{0.02}\NormalTok{, }\FunctionTok{paste0}\NormalTok{(}\FunctionTok{round}\NormalTok{(percent}\SpecialCharTok{*}\DecValTok{100}\NormalTok{), }\StringTok{"\%"}\NormalTok{), }\StringTok{""}\NormalTok{))}
+
+\CommentTok{\# Palette de couleurs pour WEMWBS}
+\NormalTok{my\_palette\_WE }\OtherTok{\textless{}{-}}\NormalTok{ scales}\SpecialCharTok{::}\FunctionTok{gradient\_n\_pal}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"lightgreen"}\NormalTok{, }\StringTok{"mediumseagreen"}\NormalTok{, }\StringTok{"green"}\NormalTok{, }\StringTok{"seagreen"}\NormalTok{, }\StringTok{"darkgreen"}\NormalTok{))}
+\NormalTok{colors\_WE }\OtherTok{\textless{}{-}} \FunctionTok{my\_palette\_WE}\NormalTok{(}\FunctionTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, }\AttributeTok{length.out =} \DecValTok{5}\NormalTok{))}
+
+\CommentTok{\# Visualisation}
+\FunctionTok{ggplot}\NormalTok{(WE\_Reponse\_EBE\_P1\_final\_summary, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Question, }\AttributeTok{y =}\NormalTok{ percent, }\AttributeTok{fill =}\NormalTok{ Response)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{, }\AttributeTok{position =} \StringTok{"fill"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_text}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label =}\NormalTok{ percent\_label),}
+            \AttributeTok{position =} \FunctionTok{position\_fill}\NormalTok{(}\AttributeTok{vjust =} \FloatTok{0.5}\NormalTok{),}
+            \AttributeTok{color =} \StringTok{"white"}\NormalTok{,}
+            \AttributeTok{size =} \DecValTok{3}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept =} \FloatTok{0.5}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{color =} \StringTok{"black"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_flip}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\FunctionTok{percent\_format}\NormalTok{()) }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_manual}\NormalTok{(}\AttributeTok{values =}\NormalTok{ colors\_WE) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Distribution of Warwick{-}Edinburgh responses by question"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Question"}\NormalTok{,}
+       \AttributeTok{y =} \StringTok{"Percentage"}\NormalTok{,}
+       \AttributeTok{fill =} \StringTok{"Response"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/calcul score Warwick Edinburg-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. Filtrer la correspondance SCOFF}
+\NormalTok{SCOFF\_correspondance }\OtherTok{\textless{}{-}}\NormalTok{ Correspondance\_EBEP1\_2025 }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Echelle }\SpecialCharTok{==} \StringTok{"SCOFF"}\NormalTok{)}
+
+\CommentTok{\# 2. Sélectionner les colonnes SCOFF dans les réponses}
+\NormalTok{SCOFF\_Reponse\_EBE\_P1\_final }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{contains}\NormalTok{(}\StringTok{"SCOFF"}\NormalTok{))}
+
+\CommentTok{\# 3. Nettoyage et transformation en score binaire (0/1)}
+\NormalTok{SCOFF\_Reponse\_EBE\_P1\_final\_for\_score }\OtherTok{\textless{}{-}}\NormalTok{ SCOFF\_Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{everything}\NormalTok{(), }\SpecialCharTok{\textasciitilde{}} \FunctionTok{case\_when}\NormalTok{(}
+    \FunctionTok{str\_to\_lower}\NormalTok{(.) }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\StringTok{"yes"}\NormalTok{, }\StringTok{"oui"}\NormalTok{) }\SpecialCharTok{\textasciitilde{}} \DecValTok{1}\NormalTok{,}
+    \FunctionTok{str\_to\_lower}\NormalTok{(.) }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\StringTok{"no"}\NormalTok{, }\StringTok{"non"}\NormalTok{) }\SpecialCharTok{\textasciitilde{}} \DecValTok{0}\NormalTok{,}
+    \ConstantTok{TRUE} \SpecialCharTok{\textasciitilde{}} \ConstantTok{NA\_real\_}  \CommentTok{\# ou NA\_integer\_ si tu veux des entiers}
+\NormalTok{  )))}
+
+\CommentTok{\# 4. Calcul du score total par individu}
+\NormalTok{SCOFF\_Reponse\_EBE\_P1\_final\_score }\OtherTok{\textless{}{-}}\NormalTok{ SCOFF\_Reponse\_EBE\_P1\_final\_for\_score }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{rowSums}\NormalTok{(}\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as.data.frame}\NormalTok{()}
+\FunctionTok{colnames}\NormalTok{(SCOFF\_Reponse\_EBE\_P1\_final\_score) }\OtherTok{\textless{}{-}} \StringTok{"SCOFF\_total"}
+
+\CommentTok{\# 5. Application du cutoff clinique}
+\NormalTok{SCOFF\_Reponse\_EBE\_P1\_final\_score }\OtherTok{\textless{}{-}}\NormalTok{ SCOFF\_Reponse\_EBE\_P1\_final\_score }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{SCOFF\_risque\_TCA =} \FunctionTok{ifelse}\NormalTok{(SCOFF\_total }\SpecialCharTok{\textgreater{}=} \DecValTok{2}\NormalTok{, }\StringTok{"Risk\_SCOFF"}\NormalTok{, }\StringTok{"No\_Risk"}\NormalTok{))}
+
+\CommentTok{\# Barplot}
+
+\CommentTok{\# Préparation du résumé SCOFF}
+\NormalTok{SCOFF\_summary }\OtherTok{\textless{}{-}}\NormalTok{ SCOFF\_Reponse\_EBE\_P1\_final\_score }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(SCOFF\_total) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{n =} \FunctionTok{n}\NormalTok{(), }\AttributeTok{.groups =} \StringTok{"drop"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{percent =}\NormalTok{ n }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(n),}
+         \AttributeTok{SCOFF\_total =} \FunctionTok{factor}\NormalTok{(SCOFF\_total, }\AttributeTok{levels =} \FunctionTok{sort}\NormalTok{(}\FunctionTok{unique}\NormalTok{(SCOFF\_total))),}
+         \AttributeTok{SCOFF\_num =} \FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{as.character}\NormalTok{(SCOFF\_total)) }\CommentTok{\# Conversion en numérique}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{SCOFF\_total =} \FunctionTok{factor}\NormalTok{(SCOFF\_total, }\AttributeTok{levels =} \FunctionTok{as.character}\NormalTok{(}\DecValTok{0}\SpecialCharTok{:}\DecValTok{5}\NormalTok{)))}
+
+\CommentTok{\# Calculer la hauteur cumulée au seuil SCOFF\_num == 2}
+\NormalTok{cutoff\_y }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(SCOFF\_summary}\SpecialCharTok{$}\NormalTok{percent[SCOFF\_summary}\SpecialCharTok{$}\NormalTok{SCOFF\_num }\SpecialCharTok{\textless{}} \DecValTok{2}\NormalTok{])}
+
+\FunctionTok{ggplot}\NormalTok{(SCOFF\_summary, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \DecValTok{1}\NormalTok{, }\AttributeTok{y =}\NormalTok{ percent, }\AttributeTok{fill =}\NormalTok{ SCOFF\_num)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{, }\AttributeTok{width =} \FloatTok{0.7}\NormalTok{, }\AttributeTok{position =} \StringTok{"stack"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_text}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label =} \FunctionTok{paste0}\NormalTok{(}\FunctionTok{round}\NormalTok{(percent }\SpecialCharTok{*} \DecValTok{100}\NormalTok{), }\StringTok{"\%"}\NormalTok{)),}
+            \AttributeTok{position =} \FunctionTok{position\_stack}\NormalTok{(}\AttributeTok{vjust =} \FloatTok{0.5}\NormalTok{),}
+            \AttributeTok{color =} \StringTok{"white"}\NormalTok{, }\AttributeTok{size =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_gradientn}\NormalTok{(}
+    \AttributeTok{colors =} \FunctionTok{c}\NormalTok{(}\StringTok{"\#FFC0CB"}\NormalTok{, }\StringTok{"\#DA70D6"}\NormalTok{, }\StringTok{"\#8A2BE2"}\NormalTok{),  }\CommentTok{\# dégradé rose {-}\textgreater{} violet}
+    \AttributeTok{breaks =} \DecValTok{0}\SpecialCharTok{:}\DecValTok{5}\NormalTok{,}
+    \AttributeTok{labels =} \DecValTok{0}\SpecialCharTok{:}\DecValTok{5}\NormalTok{,}
+    \AttributeTok{limits =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{5}\NormalTok{),}
+    \AttributeTok{name =} \StringTok{"SCOFF Total Score"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \CommentTok{\# Ligne horizontale à la hauteur du cutoff}
+  \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept =}\NormalTok{ cutoff\_y, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{color =} \StringTok{"black"}\NormalTok{, }\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  
+  \CommentTok{\# Annotation "Not at risk" à gauche sous la ligne}
+  \FunctionTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\AttributeTok{x =} \FloatTok{0.7}\NormalTok{, }\AttributeTok{y =}\NormalTok{ cutoff\_y }\SpecialCharTok{/} \DecValTok{2}\NormalTok{, }\AttributeTok{label =} \StringTok{"Not at risk"}\NormalTok{, }\AttributeTok{angle =} \DecValTok{0}\NormalTok{, }\AttributeTok{size =} \DecValTok{5}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  
+  \CommentTok{\# Annotation "At risk" à gauche au{-}dessus de la ligne}
+  \FunctionTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\AttributeTok{x =} \FloatTok{0.7}\NormalTok{, }\AttributeTok{y =}\NormalTok{ cutoff\_y }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ cutoff\_y) }\SpecialCharTok{/} \DecValTok{2}\NormalTok{, }\AttributeTok{label =} \StringTok{"At risk"}\NormalTok{, }\AttributeTok{angle =} \DecValTok{0}\NormalTok{, }\AttributeTok{size =} \DecValTok{5}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  
+  \FunctionTok{coord\_flip}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\FunctionTok{percent\_format}\NormalTok{()) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Distribution of SCOFF Total Scores"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{""}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Proportion"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{12}\NormalTok{),}
+    \AttributeTok{axis.text.y =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{axis.ticks.y =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
+    \AttributeTok{legend.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{12}\NormalTok{),}
+    \AttributeTok{legend.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{11}\NormalTok{)}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/calcul score SCOFF-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 6. Renommage des colonnes avec noms anglais (si disponibles)}
+\NormalTok{old\_names }\OtherTok{\textless{}{-}} \FunctionTok{colnames}\NormalTok{(SCOFF\_Reponse\_EBE\_P1\_final)}
+\NormalTok{new\_names }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(old\_names, }\ControlFlowTok{function}\NormalTok{(x) \{}
+\NormalTok{  idx }\OtherTok{\textless{}{-}} \FunctionTok{which}\NormalTok{(SCOFF\_correspondance}\SpecialCharTok{$}\NormalTok{Code }\SpecialCharTok{==}\NormalTok{ x)}
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{length}\NormalTok{(idx) }\SpecialCharTok{==} \DecValTok{1}\NormalTok{) \{}
+    \FunctionTok{return}\NormalTok{(SCOFF\_correspondance}\SpecialCharTok{$}\NormalTok{Nom\_anglais[idx])}
+\NormalTok{  \} }\ControlFlowTok{else}\NormalTok{ \{}
+    \FunctionTok{return}\NormalTok{(x)}
+\NormalTok{  \}}
+\NormalTok{\})}
+\FunctionTok{colnames}\NormalTok{(SCOFF\_Reponse\_EBE\_P1\_final) }\OtherTok{\textless{}{-}}\NormalTok{ new\_names}
+
+\CommentTok{\# 7. Passage en format long}
+\NormalTok{SCOFF\_Reponse\_EBE\_P1\_final\_long }\OtherTok{\textless{}{-}}\NormalTok{ SCOFF\_Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}
+    \AttributeTok{cols =} \FunctionTok{everything}\NormalTok{(),}
+    \AttributeTok{names\_to =} \StringTok{"Question"}\NormalTok{,}
+    \AttributeTok{values\_to =} \StringTok{"Response"}
+\NormalTok{  )}
+
+\CommentTok{\# 8. Résumé des réponses}
+\NormalTok{SCOFF\_Reponse\_EBE\_P1\_final\_summary }\OtherTok{\textless{}{-}}\NormalTok{ SCOFF\_Reponse\_EBE\_P1\_final\_long }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Question, Response) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{n =} \FunctionTok{n}\NormalTok{(), }\AttributeTok{.groups =} \StringTok{"drop"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Question) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{percent =}\NormalTok{ n }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(n))}
+
+\CommentTok{\# 9. Forcer l’ordre (0 = non, 1 = oui)}
+\NormalTok{SCOFF\_Reponse\_EBE\_P1\_final\_summary }\OtherTok{\textless{}{-}}\NormalTok{ SCOFF\_Reponse\_EBE\_P1\_final\_summary }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Response =} \FunctionTok{factor}\NormalTok{(Response, }\AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Yes"}\NormalTok{, }\StringTok{"No"}\NormalTok{), }\AttributeTok{labels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Yes"}\NormalTok{, }\StringTok{"No"}\NormalTok{)))}
+
+\CommentTok{\# 10. Préparation des étiquettes}
+\NormalTok{SCOFF\_Reponse\_EBE\_P1\_final\_summary }\OtherTok{\textless{}{-}}\NormalTok{ SCOFF\_Reponse\_EBE\_P1\_final\_summary }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{percent\_label =} \FunctionTok{ifelse}\NormalTok{(percent }\SpecialCharTok{\textgreater{}} \FloatTok{0.02}\NormalTok{, }\FunctionTok{paste0}\NormalTok{(}\FunctionTok{round}\NormalTok{(percent}\SpecialCharTok{*}\DecValTok{100}\NormalTok{), }\StringTok{"\%"}\NormalTok{), }\StringTok{""}\NormalTok{))}
+
+\CommentTok{\# 11. Palette et graphe}
+\NormalTok{colors\_SCOFF }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"darkred"}\NormalTok{, }\StringTok{"darkgreen"}\NormalTok{)}
+
+\FunctionTok{ggplot}\NormalTok{(SCOFF\_Reponse\_EBE\_P1\_final\_summary, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Question, }\AttributeTok{y =}\NormalTok{ percent, }\AttributeTok{fill =}\NormalTok{ Response)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{, }\AttributeTok{position =} \StringTok{"fill"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_text}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label =}\NormalTok{ percent\_label),}
+            \AttributeTok{position =} \FunctionTok{position\_fill}\NormalTok{(}\AttributeTok{vjust =} \FloatTok{0.5}\NormalTok{),}
+            \AttributeTok{color =} \StringTok{"white"}\NormalTok{,}
+            \AttributeTok{size =} \DecValTok{3}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept =} \FloatTok{0.5}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{color =} \StringTok{"black"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_flip}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\FunctionTok{percent\_format}\NormalTok{()) }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_manual}\NormalTok{(}\AttributeTok{values =}\NormalTok{ colors\_SCOFF) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Distribution of SCOFF responses by question"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Question"}\NormalTok{,}
+       \AttributeTok{y =} \StringTok{"Percentage"}\NormalTok{,}
+       \AttributeTok{fill =} \StringTok{"Answer"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/calcul score SCOFF PArt2-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Filtrer la correspondance pour MBI{-}SS}
+\NormalTok{MBI\_correspondance }\OtherTok{\textless{}{-}}\NormalTok{ Correspondance\_EBEP1\_2025 }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Echelle }\SpecialCharTok{==} \StringTok{"French\_MBI\_SS"}\NormalTok{)}
+
+\CommentTok{\# Sélectionner uniquement les colonnes MBI dans les réponses}
+\NormalTok{MBI\_Reponse\_EBE\_P1\_final }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{contains}\NormalTok{(}\StringTok{"French\_MBI\_SS"}\NormalTok{))}
+
+\NormalTok{MBI\_Reponse\_EBE\_P1\_final\_for\_score }\OtherTok{\textless{}{-}}\NormalTok{ MBI\_Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{everything}\NormalTok{(), }\SpecialCharTok{\textasciitilde{}}\NormalTok{ \{}
+\NormalTok{    cleaned }\OtherTok{\textless{}{-}} \FunctionTok{str\_replace\_all}\NormalTok{(}\FunctionTok{as.character}\NormalTok{(.), }\StringTok{"[\^{}0{-}9.{-}]"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+    \FunctionTok{as.numeric}\NormalTok{(cleaned)}
+\NormalTok{  \}))}
+
+
+\NormalTok{MBI\_correspondance}\SpecialCharTok{$}\NormalTok{Nom\_anglais }\OtherTok{\textless{}{-}} \FunctionTok{str\_remove\_all}\NormalTok{(MBI\_correspondance}\SpecialCharTok{$}\NormalTok{Nom\_anglais, }\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{[MBI{-}SS}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{] "}\NormalTok{)}
+
+
+\CommentTok{\# \#Epuismeent Emotionnel }
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_emotionally\_drained}
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_feeling\_exhausted\_day\_end}
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_feeling\_exhausted\_studies}
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_tired\_morning\_university}
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_studying\_stressful}
+\CommentTok{\# }
+\CommentTok{\# }
+\CommentTok{\# \#Cynisme}
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_less\_interest\_studies}
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_less\_enthusiastic\_studies}
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_more\_cynical\_about\_studies}
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_doubt\_study\_meaning}
+\CommentTok{\# }
+\CommentTok{\# \#Efficacité académique}
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_problem\_solving\_effective}
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_effective\_contribution}
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_consider\_good\_student}
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_learned\_interesting\_things}
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_feeling\_energized\_goals}
+\CommentTok{\# MBI\_Reponse\_EBE\_P1\_final\_for\_score$French\_MBI\_SS\_feeling\_effective\_in\_class}
+
+
+\NormalTok{MBI\_Reponse\_EBE\_P1\_final\_for\_score }\OtherTok{\textless{}{-}}\NormalTok{ MBI\_Reponse\_EBE\_P1\_final\_for\_score }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \CommentTok{\# Épuisement émotionnel : somme des 5 items}
+    \AttributeTok{Emotional\_Exhaustion =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{select}\NormalTok{(., }
+\NormalTok{                                          French\_MBI\_SS\_emotionally\_drained,}
+\NormalTok{                                          French\_MBI\_SS\_feeling\_exhausted\_day\_end,}
+\NormalTok{                                          French\_MBI\_SS\_feeling\_exhausted\_studies,}
+\NormalTok{                                          French\_MBI\_SS\_tired\_morning\_university,}
+\NormalTok{                                          French\_MBI\_SS\_studying\_stressful), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    
+    \CommentTok{\# Cynisme : somme des 4 items}
+    \AttributeTok{Cynicism =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{select}\NormalTok{(., }
+\NormalTok{                              French\_MBI\_SS\_less\_interest\_studies,}
+\NormalTok{                              French\_MBI\_SS\_less\_enthusiastic\_studies,}
+\NormalTok{                              French\_MBI\_SS\_more\_cynical\_about\_studies,}
+\NormalTok{                              French\_MBI\_SS\_doubt\_study\_meaning), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    
+    \CommentTok{\# Efficacité académique : somme des 6 items}
+    \AttributeTok{Academic\_Efficacy =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{select}\NormalTok{(., }
+\NormalTok{                                       French\_MBI\_SS\_problem\_solving\_effective,}
+\NormalTok{                                       French\_MBI\_SS\_effective\_contribution,}
+\NormalTok{                                       French\_MBI\_SS\_consider\_good\_student,}
+\NormalTok{                                       French\_MBI\_SS\_learned\_interesting\_things,}
+\NormalTok{                                       French\_MBI\_SS\_feeling\_energized\_goals,}
+\NormalTok{                                       French\_MBI\_SS\_feeling\_effective\_in\_class), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    
+    
+    \CommentTok{\# Classification de la sévérité}
+    \AttributeTok{Emotional\_Exhaustion\_Level =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{      Emotional\_Exhaustion }\SpecialCharTok{\textgreater{}=} \DecValTok{5}  \SpecialCharTok{\&}\NormalTok{ Emotional\_Exhaustion }\SpecialCharTok{\textless{}=} \DecValTok{13} \SpecialCharTok{\textasciitilde{}} \StringTok{"Low"}\NormalTok{,}
+\NormalTok{      Emotional\_Exhaustion }\SpecialCharTok{\textgreater{}=} \DecValTok{14} \SpecialCharTok{\&}\NormalTok{ Emotional\_Exhaustion }\SpecialCharTok{\textless{}=} \DecValTok{22} \SpecialCharTok{\textasciitilde{}} \StringTok{"Moderate"}\NormalTok{,}
+\NormalTok{      Emotional\_Exhaustion }\SpecialCharTok{\textgreater{}=} \DecValTok{23} \SpecialCharTok{\&}\NormalTok{ Emotional\_Exhaustion }\SpecialCharTok{\textless{}=} \DecValTok{30} \SpecialCharTok{\textasciitilde{}} \StringTok{"High"}\NormalTok{,}
+      \ConstantTok{TRUE} \SpecialCharTok{\textasciitilde{}} \ConstantTok{NA\_character\_}
+\NormalTok{    ),}
+    
+    \AttributeTok{Cynicism\_Level =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{      Cynicism }\SpecialCharTok{\textgreater{}=} \DecValTok{4}  \SpecialCharTok{\&}\NormalTok{ Cynicism }\SpecialCharTok{\textless{}=} \DecValTok{10} \SpecialCharTok{\textasciitilde{}} \StringTok{"Low"}\NormalTok{,}
+\NormalTok{      Cynicism }\SpecialCharTok{\textgreater{}=} \DecValTok{11} \SpecialCharTok{\&}\NormalTok{ Cynicism }\SpecialCharTok{\textless{}=} \DecValTok{17} \SpecialCharTok{\textasciitilde{}} \StringTok{"Moderate"}\NormalTok{,}
+\NormalTok{      Cynicism }\SpecialCharTok{\textgreater{}=} \DecValTok{18} \SpecialCharTok{\&}\NormalTok{ Cynicism }\SpecialCharTok{\textless{}=} \DecValTok{24} \SpecialCharTok{\textasciitilde{}} \StringTok{"High"}\NormalTok{,}
+      \ConstantTok{TRUE} \SpecialCharTok{\textasciitilde{}} \ConstantTok{NA\_character\_}
+\NormalTok{    ),}
+    
+    \AttributeTok{Academic\_Efficacy\_Level =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{      Academic\_Efficacy }\SpecialCharTok{\textgreater{}=} \DecValTok{6}  \SpecialCharTok{\&}\NormalTok{ Academic\_Efficacy }\SpecialCharTok{\textless{}=} \DecValTok{16} \SpecialCharTok{\textasciitilde{}} \StringTok{"Low"}\NormalTok{,}
+\NormalTok{      Academic\_Efficacy }\SpecialCharTok{\textgreater{}=} \DecValTok{17} \SpecialCharTok{\&}\NormalTok{ Academic\_Efficacy }\SpecialCharTok{\textless{}=} \DecValTok{26} \SpecialCharTok{\textasciitilde{}} \StringTok{"Moderate"}\NormalTok{,}
+\NormalTok{      Academic\_Efficacy }\SpecialCharTok{\textgreater{}=} \DecValTok{27} \SpecialCharTok{\&}\NormalTok{ Academic\_Efficacy }\SpecialCharTok{\textless{}=} \DecValTok{36} \SpecialCharTok{\textasciitilde{}} \StringTok{"High"}\NormalTok{,}
+      \ConstantTok{TRUE} \SpecialCharTok{\textasciitilde{}} \ConstantTok{NA\_character\_}
+\NormalTok{    )}
+\NormalTok{  )}
+\NormalTok{MBI\_Reponse\_EBE\_P1\_final\_score }\OtherTok{\textless{}{-}}
+\NormalTok{  MBI\_Reponse\_EBE\_P1\_final\_for\_score }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}
+    \CommentTok{\# Scores globaux en premier}
+\NormalTok{    Emotional\_Exhaustion,}
+\NormalTok{    Emotional\_Exhaustion\_Level,}
+    
+    
+    \CommentTok{\# Items Épuisement Émotionnel}
+\NormalTok{    French\_MBI\_SS\_emotionally\_drained,}
+\NormalTok{    French\_MBI\_SS\_feeling\_exhausted\_day\_end,}
+\NormalTok{    French\_MBI\_SS\_feeling\_exhausted\_studies,}
+\NormalTok{    French\_MBI\_SS\_tired\_morning\_university,}
+\NormalTok{    French\_MBI\_SS\_studying\_stressful,}
+    
+\NormalTok{    Cynicism,}
+\NormalTok{    Cynicism\_Level,}
+    \CommentTok{\# Items Cynisme}
+\NormalTok{    French\_MBI\_SS\_less\_interest\_studies,}
+\NormalTok{    French\_MBI\_SS\_less\_enthusiastic\_studies,}
+\NormalTok{    French\_MBI\_SS\_more\_cynical\_about\_studies,}
+\NormalTok{    French\_MBI\_SS\_doubt\_study\_meaning,}
+    
+\NormalTok{    Academic\_Efficacy,}
+\NormalTok{    Academic\_Efficacy\_Level,}
+    \CommentTok{\# Items Efficacité Académique}
+\NormalTok{    French\_MBI\_SS\_problem\_solving\_effective,}
+\NormalTok{    French\_MBI\_SS\_effective\_contribution,}
+\NormalTok{    French\_MBI\_SS\_consider\_good\_student,}
+\NormalTok{    French\_MBI\_SS\_learned\_interesting\_things,}
+\NormalTok{    French\_MBI\_SS\_feeling\_energized\_goals,}
+\NormalTok{    French\_MBI\_SS\_feeling\_effective\_in\_class,}
+    
+    \CommentTok{\# Niveaux de sévérité}
+\NormalTok{    )}
+
+\CommentTok{\# Plot Sévérité}
+
+
+\CommentTok{\# Long format + regroupement pour les proportions}
+\NormalTok{MBI\_levels\_long }\OtherTok{\textless{}{-}}\NormalTok{ MBI\_Reponse\_EBE\_P1\_final\_score }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{contains}\NormalTok{(}\StringTok{"Level"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}\AttributeTok{cols =} \FunctionTok{everything}\NormalTok{(),}
+               \AttributeTok{names\_to =} \StringTok{"Dimension"}\NormalTok{,}
+               \AttributeTok{values\_to =} \StringTok{"Severity\_Level"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{Dimension =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{      Dimension }\SpecialCharTok{==} \StringTok{"Emotional\_Exhaustion\_Level"} \SpecialCharTok{\textasciitilde{}} \StringTok{"Emotional Exhaustion"}\NormalTok{,}
+\NormalTok{      Dimension }\SpecialCharTok{==} \StringTok{"Cynicism\_Level"} \SpecialCharTok{\textasciitilde{}} \StringTok{"Cynicism"}\NormalTok{,}
+\NormalTok{      Dimension }\SpecialCharTok{==} \StringTok{"Academic\_Efficacy\_Level"} \SpecialCharTok{\textasciitilde{}} \StringTok{"Academic Efficacy"}
+\NormalTok{    )}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{count}\NormalTok{(Dimension, Severity\_Level) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Dimension) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{percent =}\NormalTok{ n }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(n),}
+    \AttributeTok{Severity\_Level =} \FunctionTok{factor}\NormalTok{(Severity\_Level, }\AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Low"}\NormalTok{, }\StringTok{"Moderate"}\NormalTok{, }\StringTok{"High"}\NormalTok{)),}
+    \AttributeTok{Dimension =} \FunctionTok{factor}\NormalTok{(Dimension, }\AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Emotional Exhaustion"}\NormalTok{, }\StringTok{"Cynicism"}\NormalTok{, }\StringTok{"Academic Efficacy"}\NormalTok{))}
+\NormalTok{  )}
+\NormalTok{MBI\_levels\_long}\SpecialCharTok{$}\NormalTok{Severity\_Level }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  MBI\_levels\_long}\SpecialCharTok{$}\NormalTok{Severity\_Level,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"High"}\NormalTok{, }\StringTok{"Moderate"}\NormalTok{, }\StringTok{"Low"}\NormalTok{)}
+\NormalTok{)}
+
+
+\FunctionTok{ggplot}\NormalTok{(MBI\_levels\_long, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Dimension, }\AttributeTok{y =}\NormalTok{ percent, }\AttributeTok{fill =}\NormalTok{ Severity\_Level)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{, }\AttributeTok{position =} \StringTok{"stack"}\NormalTok{, }\AttributeTok{width =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_text}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label =} \FunctionTok{paste0}\NormalTok{(}\FunctionTok{round}\NormalTok{(percent }\SpecialCharTok{*} \DecValTok{100}\NormalTok{), }\StringTok{"\%"}\NormalTok{)),}
+            \AttributeTok{position =} \FunctionTok{position\_stack}\NormalTok{(}\AttributeTok{vjust =} \FloatTok{0.5}\NormalTok{),}
+            \AttributeTok{color =} \StringTok{"white"}\NormalTok{, }\AttributeTok{size =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_flip}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\FunctionTok{percent\_format}\NormalTok{()) }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_manual}\NormalTok{(}
+    \AttributeTok{values =} \FunctionTok{c}\NormalTok{(}
+      \StringTok{"Low"} \OtherTok{=} \StringTok{"\#91cf60"}\NormalTok{,       }\CommentTok{\# green}
+      \StringTok{"Moderate"} \OtherTok{=} \StringTok{"\#fdae61"}\NormalTok{,  }\CommentTok{\# orange}
+      \StringTok{"High"} \OtherTok{=} \StringTok{"\#d73027"}     \CommentTok{\# red}
+\NormalTok{    ),}
+    \AttributeTok{name =} \StringTok{"Level"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Burnout Severity Levels by Dimension"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{""}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Proportion"}
+\NormalTok{  ) }\SpecialCharTok{+}
+\NormalTok{  my\_theme}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/calcul score French MBI SS-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot de tout  \#\#\#\#}
+
+\NormalTok{MBI\_Reponse\_EBE\_P1\_final\_score\_filtered }\OtherTok{\textless{}{-}}
+\NormalTok{  MBI\_Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\FunctionTok{all\_of}\NormalTok{(MBI\_correspondance}\SpecialCharTok{$}\NormalTok{Code))}
+
+\NormalTok{new\_colnames }\OtherTok{\textless{}{-}} 
+\NormalTok{  MBI\_correspondance}\SpecialCharTok{$}\NormalTok{Nom\_anglais[}\FunctionTok{match}\NormalTok{(}
+    \FunctionTok{colnames}\NormalTok{(MBI\_Reponse\_EBE\_P1\_final\_score\_filtered), }
+\NormalTok{    MBI\_correspondance}\SpecialCharTok{$}\NormalTok{Code)]}
+
+\FunctionTok{colnames}\NormalTok{(MBI\_Reponse\_EBE\_P1\_final\_score\_filtered) }\OtherTok{\textless{}{-}}\NormalTok{ new\_colnames}
+
+
+
+\CommentTok{\# Step 1: Convert data to long format}
+\NormalTok{MBI\_long }\OtherTok{\textless{}{-}}\NormalTok{ MBI\_Reponse\_EBE\_P1\_final\_score\_filtered }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}
+    \AttributeTok{cols =} \FunctionTok{everything}\NormalTok{(),}
+    \AttributeTok{names\_to =} \StringTok{"Question"}\NormalTok{,}
+    \AttributeTok{values\_to =} \StringTok{"Response"}
+\NormalTok{  )}
+
+\CommentTok{\# Step 2: Summarize responses per question}
+\NormalTok{MBI\_summary }\OtherTok{\textless{}{-}}\NormalTok{ MBI\_long }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Question, Response) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{n =} \FunctionTok{n}\NormalTok{(), }\AttributeTok{.groups =} \StringTok{"drop"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Question) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{percent =}\NormalTok{ n }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(n))}
+
+\CommentTok{\# Step 3: Define the factor levels of responses in French validated MBI{-}SS}
+\CommentTok{\# Adapt these levels according to your real coding (example given below)}
+\NormalTok{response\_levels }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+  \StringTok{"6 Always"}\NormalTok{,}
+  \StringTok{"5.0"}\NormalTok{, }
+  \StringTok{"4.0"}\NormalTok{, }
+  \StringTok{"3.0"}\NormalTok{, }
+  \StringTok{"2.0"}\NormalTok{, }
+  \StringTok{"1 Never"}
+\NormalTok{)}
+
+\NormalTok{MBI\_summary }\OtherTok{\textless{}{-}}\NormalTok{ MBI\_summary }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Response =} \FunctionTok{factor}\NormalTok{(Response, }\AttributeTok{levels =}\NormalTok{ response\_levels))}
+
+\CommentTok{\# Optional: add labels if needed, for example, highlight specific questions}
+\CommentTok{\# (You can define a vector \textasciigrave{}bold\_questions\textasciigrave{} with question names to highlight)}
+\NormalTok{bold\_questions }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{() }\CommentTok{\# fill with your important question names if any}
+
+\NormalTok{MBI\_summary }\OtherTok{\textless{}{-}}\NormalTok{ MBI\_summary }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{bold\_label =} \FunctionTok{ifelse}\NormalTok{(Question }\SpecialCharTok{\%in\%}\NormalTok{ bold\_questions, }\ConstantTok{TRUE}\NormalTok{, }\ConstantTok{FALSE}\NormalTok{),}
+         \AttributeTok{percent\_label =} \FunctionTok{ifelse}\NormalTok{(percent }\SpecialCharTok{\textgreater{}} \FloatTok{0.02}\NormalTok{, }\FunctionTok{paste0}\NormalTok{(}\FunctionTok{round}\NormalTok{(percent}\SpecialCharTok{*}\DecValTok{100}\NormalTok{), }\StringTok{"\%"}\NormalTok{), }\StringTok{""}\NormalTok{))}
+
+\CommentTok{\# Step 4: Define a color palette for your responses (7 levels)}
+\NormalTok{my\_palette\_MBI }\OtherTok{\textless{}{-}}\NormalTok{ scales}\SpecialCharTok{::}\FunctionTok{gradient\_n\_pal}\NormalTok{(}\FunctionTok{c}\NormalTok{(}
+  \StringTok{"lightblue"}\NormalTok{, }\StringTok{"skyblue"}\NormalTok{, }\StringTok{"deepskyblue"}\NormalTok{, }
+  \StringTok{"dodgerblue"}\NormalTok{, }\StringTok{"blue"}\NormalTok{, }\StringTok{"darkblue"}\NormalTok{, }\StringTok{"navy"}
+\NormalTok{))}
+\NormalTok{colors\_MBI }\OtherTok{\textless{}{-}} \FunctionTok{my\_palette\_MBI}\NormalTok{(}\FunctionTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, }\AttributeTok{length.out =} \FunctionTok{length}\NormalTok{(response\_levels)))}
+
+\CommentTok{\# Step 5: Plot}
+\FunctionTok{ggplot}\NormalTok{(MBI\_summary, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Question, }\AttributeTok{y =}\NormalTok{ percent, }\AttributeTok{fill =}\NormalTok{ Response)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{, }\AttributeTok{position =} \StringTok{"fill"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_text}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label =}\NormalTok{ percent\_label),}
+            \AttributeTok{position =} \FunctionTok{position\_fill}\NormalTok{(}\AttributeTok{vjust =} \FloatTok{0.5}\NormalTok{),}
+            \AttributeTok{color =} \StringTok{"white"}\NormalTok{,}
+            \AttributeTok{size =} \DecValTok{3}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept =} \FloatTok{0.5}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{color =} \StringTok{"black"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_flip}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\FunctionTok{percent\_format}\NormalTok{()) }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_manual}\NormalTok{(}\AttributeTok{values =}\NormalTok{ colors\_MBI) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Distribution of French MBI{-}SS responses by question"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Question"}\NormalTok{,}
+       \AttributeTok{y =} \StringTok{"Percentage"}\NormalTok{,}
+       \AttributeTok{fill =} \StringTok{"Response"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/calcul score French MBI SS Part2-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{All\_scores }\OtherTok{\textless{}{-}}
+  \FunctionTok{cbind}\NormalTok{((MBI\_Reponse\_EBE\_P1\_final\_score }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{          dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"French"}\NormalTok{))), }
+\NormalTok{       (SCOFF\_Reponse\_EBE\_P1\_final\_score),}
+\NormalTok{       WE\_Reponse\_EBE\_P1\_final\_score)}
+
+
+\NormalTok{All\_scores }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\FunctionTok{where}\NormalTok{(is.numeric)) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{ggpairs}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/All Scores-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Count responses per university}
+\NormalTok{df\_univ }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{count}\NormalTok{(University)}
+
+
+\CommentTok{\# Optional: sort by descending count}
+\NormalTok{df\_univ }\OtherTok{\textless{}{-}}\NormalTok{ df\_univ }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(n))}
+
+\CommentTok{\# Plot}
+\FunctionTok{ggplot}\NormalTok{(df\_univ, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \FunctionTok{reorder}\NormalTok{(University, n), }\AttributeTok{y =}\NormalTok{ n)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{, }\AttributeTok{fill =} \StringTok{"darkblue"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_text}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label =}\NormalTok{ n),}
+            \AttributeTok{hjust =} \FloatTok{1.1}\NormalTok{,}
+            \AttributeTok{color =} \StringTok{"white"}\NormalTok{,}
+            \AttributeTok{size =} \FloatTok{3.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_flip}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{expand =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.01}\NormalTok{, }\DecValTok{0}\NormalTok{)) }\SpecialCharTok{+}  \CommentTok{\# small space at the start}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Distribution of responses by University"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"University"}\NormalTok{,}
+       \AttributeTok{y =} \StringTok{"Number of responses"}\NormalTok{) }\SpecialCharTok{+}
+\NormalTok{  my\_theme}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/Distribution of responses by university-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Préparer les données}
+\NormalTok{Score\_and\_univeristy }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\StringTok{"University"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{cbind}\NormalTok{(All\_scores) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"University"}\NormalTok{, }\FunctionTok{where}\NormalTok{(is.numeric)))}
+
+\CommentTok{\# Format long}
+\NormalTok{data\_long }\OtherTok{\textless{}{-}}\NormalTok{ Score\_and\_univeristy }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}
+    \AttributeTok{cols =} \SpecialCharTok{{-}}\NormalTok{University,}
+    \AttributeTok{names\_to =} \StringTok{"Score\_Type"}\NormalTok{,}
+    \AttributeTok{values\_to =} \StringTok{"Score"}
+\NormalTok{  )}
+
+\CommentTok{\# Diviser les données par Score\_Type}
+\NormalTok{data\_split }\OtherTok{\textless{}{-}}\NormalTok{ data\_long }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{group\_split}\NormalTok{(Score\_Type)}
+\NormalTok{score\_names }\OtherTok{\textless{}{-}}\NormalTok{ data\_long }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{distinct}\NormalTok{(Score\_Type) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{pull}\NormalTok{()}
+
+\CommentTok{\# Créer les plots}
+\NormalTok{plots }\OtherTok{\textless{}{-}} \FunctionTok{map2}\NormalTok{(data\_split, score\_names, }\ControlFlowTok{function}\NormalTok{(df, score\_name) \{}
+  
+  \CommentTok{\# Médiane nationale}
+\NormalTok{  national\_median }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{summarize}\NormalTok{(}\AttributeTok{National\_Median =} \FunctionTok{median}\NormalTok{(Score, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{pull}\NormalTok{(National\_Median)}
+  
+  \CommentTok{\# Statistiques par université : médiane, max, effectif}
+\NormalTok{  university\_stats }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{group\_by}\NormalTok{(University) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{summarize}\NormalTok{(}
+      \AttributeTok{Uni\_Median =} \FunctionTok{median}\NormalTok{(Score, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+      \AttributeTok{Max\_Score =} \FunctionTok{max}\NormalTok{(Score, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+      \AttributeTok{N =} \FunctionTok{n}\NormalTok{(),}
+      \AttributeTok{.groups =} \StringTok{"drop"}
+\NormalTok{    )}
+  
+  \CommentTok{\# Première université pour placer le label national median}
+\NormalTok{  first\_uni }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{pull}\NormalTok{(University) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{unique}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{sort}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{first}\NormalTok{()}
+  
+  \FunctionTok{ggplot}\NormalTok{(df, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ University, }\AttributeTok{y =}\NormalTok{ Score, }\AttributeTok{fill =}\NormalTok{ University)) }\SpecialCharTok{+}
+    \FunctionTok{geom\_violin}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.3}\NormalTok{, }\AttributeTok{colour =} \StringTok{"grey40"}\NormalTok{, }\AttributeTok{draw\_quantiles =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.25}\NormalTok{, }\FloatTok{0.5}\NormalTok{, }\FloatTok{0.75}\NormalTok{)) }\SpecialCharTok{+}
+    \FunctionTok{geom\_sina}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.3}\NormalTok{) }\SpecialCharTok{+}
+    
+    \CommentTok{\# Ligne médiane nationale}
+    \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept =}\NormalTok{ national\_median, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{color =} \StringTok{"black"}\NormalTok{) }\SpecialCharTok{+}
+    
+    \CommentTok{\# Texte médiane nationale à gauche (sur la première université)}
+    \FunctionTok{annotate}\NormalTok{(}
+      \StringTok{"text"}\NormalTok{,}
+      \AttributeTok{x =}\NormalTok{ first\_uni,}
+      \AttributeTok{y =}\NormalTok{ national\_median,}
+      \AttributeTok{label =} \FunctionTok{paste0}\NormalTok{(}\StringTok{"National median: "}\NormalTok{, }\FunctionTok{round}\NormalTok{(national\_median, }\DecValTok{1}\NormalTok{)),}
+      \AttributeTok{hjust =} \DecValTok{0}\NormalTok{, }\AttributeTok{vjust =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{, }\AttributeTok{color =} \StringTok{"red3"}\NormalTok{, }\AttributeTok{size =} \DecValTok{3}
+\NormalTok{    ) }\SpecialCharTok{+}
+    
+    \CommentTok{\# Texte médiane + effectif placé juste au{-}dessus du max de chaque université}
+    \FunctionTok{geom\_text}\NormalTok{(}
+      \AttributeTok{data =}\NormalTok{ university\_stats, }
+      \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ University, }\AttributeTok{y =}\NormalTok{ Max\_Score }\SpecialCharTok{+} \FloatTok{0.5}\NormalTok{, }\AttributeTok{label =} \FunctionTok{paste0}\NormalTok{(}\StringTok{"(n = "}\NormalTok{, N, }\StringTok{")"}\NormalTok{)),}
+      \AttributeTok{vjust =} \DecValTok{0}\NormalTok{, }\AttributeTok{size =} \DecValTok{3}\NormalTok{, }\AttributeTok{color =} \StringTok{"black"}\NormalTok{, }\AttributeTok{inherit.aes =} \ConstantTok{FALSE}
+\NormalTok{    ) }\SpecialCharTok{+}
+    
+    \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Score:"}\NormalTok{, score\_name),}
+         \AttributeTok{x =} \StringTok{"University"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Score"}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}
+      \AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{),}
+      \AttributeTok{legend.position =} \StringTok{"none"}
+\NormalTok{    )}
+\NormalTok{\})}
+\NormalTok{plots}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [[1]]
+\end{verbatim}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/Score by university-1.pdf}
+
+\begin{verbatim}
+## 
+## [[2]]
+\end{verbatim}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/Score by university-2.pdf}
+
+\begin{verbatim}
+## 
+## [[3]]
+\end{verbatim}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/Score by university-3.pdf}
+
+\begin{verbatim}
+## 
+## [[4]]
+\end{verbatim}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/Score by university-4.pdf}
+
+\begin{verbatim}
+## 
+## [[5]]
+\end{verbatim}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/Score by university-5.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{make\_upset\_plot }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(data, prefix, }\AttributeTok{keep\_order =} \ConstantTok{FALSE}\NormalTok{) \{}
+  \CommentTok{\# 1. Sélectionner et recoder en binaire}
+\NormalTok{  df\_binary }\OtherTok{\textless{}{-}}\NormalTok{ data }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{select}\NormalTok{(}\FunctionTok{contains}\NormalTok{(prefix)) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{mutate}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{everything}\NormalTok{(), }\SpecialCharTok{\textasciitilde{}} \FunctionTok{ifelse}\NormalTok{(.x }\SpecialCharTok{==} \StringTok{"Yes"}\NormalTok{, }\DecValTok{1}\NormalTok{,}
+                                         \FunctionTok{ifelse}\NormalTok{(.x }\SpecialCharTok{==} \StringTok{"No"}\NormalTok{, }\DecValTok{0}\NormalTok{, }\ConstantTok{NA}\NormalTok{)))) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{filter}\NormalTok{(}\FunctionTok{if\_all}\NormalTok{(}\FunctionTok{everything}\NormalTok{(), }\SpecialCharTok{\textasciitilde{}} \SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(.)))}
+  
+  \CommentTok{\# 2. Renommer les colonnes en retirant le préfixe}
+  \FunctionTok{colnames}\NormalTok{(df\_binary) }\OtherTok{\textless{}{-}} \FunctionTok{str\_remove}\NormalTok{(}\FunctionTok{colnames}\NormalTok{(df\_binary), prefix)}
+  
+  \CommentTok{\# 3. Calculer le nombre de "Yes" et trier les colonnes}
+\NormalTok{  yes\_counts }\OtherTok{\textless{}{-}} \FunctionTok{colSums}\NormalTok{(df\_binary)}
+\NormalTok{  ordered\_columns }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(}\FunctionTok{sort}\NormalTok{(yes\_counts, }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{))}
+\NormalTok{  df\_binary }\OtherTok{\textless{}{-}}\NormalTok{ df\_binary[, ordered\_columns]}
+  
+  \CommentTok{\# 4. Ajouter "(n = X)" aux noms de colonnes}
+\NormalTok{  new\_colnames }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(ordered\_columns, }\StringTok{" (n = "}\NormalTok{, yes\_counts[ordered\_columns], }\StringTok{")"}\NormalTok{)}
+  \FunctionTok{colnames}\NormalTok{(df\_binary) }\OtherTok{\textless{}{-}}\NormalTok{ new\_colnames}
+  
+  \CommentTok{\# 5. Afficher le plot UpSet}
+  \FunctionTok{upset}\NormalTok{(}
+\NormalTok{    df\_binary,}
+    \AttributeTok{sets =}\NormalTok{ new\_colnames,}
+    \AttributeTok{order.by =} \StringTok{"freq"}\NormalTok{,}
+    \AttributeTok{keep.order =}\NormalTok{ keep\_order}
+\NormalTok{  )}
+\NormalTok{\}}
+
+\FunctionTok{make\_upset\_plot}\NormalTok{(Reponse\_EBE\_P1\_final, }\StringTok{"HighSchool\_Last\_Year\_specialty\_"}\NormalTok{, }\AttributeTok{keep\_order =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/upset plot-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{make\_upset\_plot}\NormalTok{(Reponse\_EBE\_P1\_final, }\StringTok{"HighSchool\_SecondLast\_Year\_specialty\_"}\NormalTok{, }\AttributeTok{keep\_order =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/upset plot-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bacc\_single }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(Baccalaureate\_Field)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{count}\NormalTok{(Baccalaureate\_Field) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{freq =}\NormalTok{ n }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(n) }\SpecialCharTok{*} \DecValTok{100}\NormalTok{)}
+
+\NormalTok{my\_colors }\OtherTok{\textless{}{-}} \FunctionTok{brewer.pal}\NormalTok{(}\DecValTok{4}\NormalTok{, }\StringTok{"Set2"}\NormalTok{)  }\CommentTok{\# soft pastel colors, great for 4 categories}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(bacc\_single, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \DecValTok{1}\NormalTok{, }\AttributeTok{y =}\NormalTok{ freq, }\AttributeTok{fill =}\NormalTok{ Baccalaureate\_Field)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{, }\AttributeTok{width =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_text}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label =} \FunctionTok{paste0}\NormalTok{(}\FunctionTok{round}\NormalTok{(freq, }\DecValTok{1}\NormalTok{), }\StringTok{"\%"}\NormalTok{)),}
+            \AttributeTok{position =} \FunctionTok{position\_stack}\NormalTok{(}\AttributeTok{vjust =} \FloatTok{0.5}\NormalTok{), }\AttributeTok{size =} \DecValTok{4}\NormalTok{, }\AttributeTok{color =} \StringTok{"black"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_flip}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_manual}\NormalTok{(}\AttributeTok{values =}\NormalTok{ my\_colors) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Distribution of Baccalaureate Fields (in \%)"}\NormalTok{,}
+    \AttributeTok{x =} \ConstantTok{NULL}\NormalTok{,}
+    \CommentTok{\#y = "Percentage (\%)",}
+    \AttributeTok{fill =} \StringTok{"Field"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.y =} \FunctionTok{element\_blank}\NormalTok{(), }\AttributeTok{axis.ticks.y =} \FunctionTok{element\_blank}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/Bacc-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{make\_upset\_plot}\NormalTok{(Reponse\_EBE\_P1\_final, }\StringTok{"Info\_source\_"}\NormalTok{, }\AttributeTok{keep\_order =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/upset plot part 2-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{make\_upset\_plot}\NormalTok{(Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{Psychiatric\_history\_Yes), }\StringTok{"Psychiatric\_history\_"}\NormalTok{, }\AttributeTok{keep\_order =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/upset plot part 2-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{make\_upset\_plot}\NormalTok{(Reponse\_EBE\_P1\_final, }\StringTok{"Violence\_suffered\_from\_"}\NormalTok{, }\AttributeTok{keep\_order =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/upset plot part 2-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{make\_upset\_plot}\NormalTok{(Reponse\_EBE\_P1\_final, }\StringTok{"Violence\_type\_"}\NormalTok{, }\AttributeTok{keep\_order =} \ConstantTok{TRUE}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/upset plot part 2-4.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{make\_upset\_plot}\NormalTok{(Reponse\_EBE\_P1\_final, }\StringTok{"Tutoring\_service\_looked\_for\_"}\NormalTok{, }\AttributeTok{keep\_order =} \ConstantTok{TRUE}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/upset plot part 2-5.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{make\_upset\_plot}\NormalTok{(Reponse\_EBE\_P1\_final, }\StringTok{"Private\_preparation\_service\_looked\_for\_"}\NormalTok{, }\AttributeTok{keep\_order =} \ConstantTok{TRUE}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/upset plot part 2-6.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{make\_upset\_plot}\NormalTok{(Reponse\_EBE\_P1\_final, }\StringTok{"Academic\_pre\_entry\_"}\NormalTok{, }\AttributeTok{keep\_order =} \ConstantTok{TRUE}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/upset plot part 2-7.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{make\_upset\_plot}\NormalTok{(Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{                  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{Workplace\_suitable\_for\_your\_needs), }\StringTok{"Workplace\_"}\NormalTok{, }\AttributeTok{keep\_order =} \ConstantTok{TRUE}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/upset plot part 2-8.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# make\_upset\_plot(Reponse\_EBE\_P1\_final, "Suicidal\_thoughts\_Frequency\_", keep\_order = TRUE) }
+\CommentTok{\#  Not used anymore}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Reponse\_EBE\_P1\_final}\SpecialCharTok{$}\NormalTok{Fifth\_choice\_health\_track }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_final}\SpecialCharTok{$}\NormalTok{Fifth\_choice\_health\_track }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{recode}\NormalTok{(}
+    \StringTok{"No fifth choice other than fourth"} \OtherTok{=} \StringTok{"No fifth choice different from fourth"}
+\NormalTok{  )}
+
+
+
+\NormalTok{health\_track\_long }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{contains}\NormalTok{(}\StringTok{"health\_track"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Respondent\_ID =} \FunctionTok{row\_number}\NormalTok{()) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}
+    \AttributeTok{cols =} \SpecialCharTok{{-}}\NormalTok{Respondent\_ID,}
+    \AttributeTok{names\_to =} \StringTok{"Choice\_Order"}\NormalTok{,}
+    \AttributeTok{values\_to =} \StringTok{"Health\_Track"}
+\NormalTok{  )}
+
+
+
+\NormalTok{health\_track\_long }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{contains}\NormalTok{(}\StringTok{"health\_track"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Respondent\_ID =} \FunctionTok{row\_number}\NormalTok{()) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}
+    \AttributeTok{cols =} \SpecialCharTok{{-}}\NormalTok{Respondent\_ID,}
+    \AttributeTok{names\_to =} \StringTok{"Choice\_Order"}\NormalTok{,}
+    \AttributeTok{values\_to =} \StringTok{"Health\_Track"}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \CommentTok{\# 3. Ordonner les niveaux de Choice\_Order}
+    \AttributeTok{Choice\_Order =} \FunctionTok{factor}\NormalTok{(Choice\_Order, }\AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}
+      \StringTok{"First\_choice\_health\_track"}\NormalTok{,}
+      \StringTok{"Second\_choice\_health\_track"}\NormalTok{,}
+      \StringTok{"Third\_choice\_health\_track"}\NormalTok{,}
+      \StringTok{"Fourth\_choice\_health\_track"}\NormalTok{,}
+      \StringTok{"Fifth\_choice\_health\_track"}
+\NormalTok{    ))}
+\NormalTok{  )}
+
+\CommentTok{\# 3. Plot}
+\FunctionTok{ggplot}\NormalTok{(health\_track\_long }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(Health\_Track)),}
+       \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \FunctionTok{fct\_infreq}\NormalTok{(Health\_Track))) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{fill =} \StringTok{"\#3182bd"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_text}\NormalTok{(}\AttributeTok{stat =} \StringTok{"count"}\NormalTok{, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{label =} \FunctionTok{after\_stat}\NormalTok{(count)), }\AttributeTok{hjust =} \SpecialCharTok{{-}}\FloatTok{0.1}\NormalTok{, }\AttributeTok{size =} \FloatTok{3.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_flip}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ Choice\_Order, }\AttributeTok{scales =} \StringTok{"free\_y"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Distribution of Health Track Choices by Rank"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Health Track"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Number of Respondents"}
+\NormalTok{  ) }\SpecialCharTok{+}
+\NormalTok{  my\_theme }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{strip.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{12}\NormalTok{),}
+        \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{expand\_limits}\NormalTok{(}\AttributeTok{y =} \FloatTok{1.05} \SpecialCharTok{*} \FunctionTok{max}\NormalTok{(}\FunctionTok{table}\NormalTok{(health\_track\_long}\SpecialCharTok{$}\NormalTok{Health\_Track, health\_track\_long}\SpecialCharTok{$}\NormalTok{Choice\_Order)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/health track-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Step 1: Reshape to long format}
+\NormalTok{  health\_track\_long\_2 }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{contains}\NormalTok{(}\StringTok{"health\_track"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Respondent\_ID =} \FunctionTok{row\_number}\NormalTok{()) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}
+    \AttributeTok{cols =} \SpecialCharTok{{-}}\NormalTok{Respondent\_ID,}
+    \AttributeTok{names\_to =} \StringTok{"Choice\_Order"}\NormalTok{,}
+    \AttributeTok{values\_to =} \StringTok{"Health\_Track"}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{Health\_Track =} \FunctionTok{if\_else}\NormalTok{(}\FunctionTok{str\_detect}\NormalTok{(Health\_Track, }\StringTok{"No .* choice different from .*"}\NormalTok{),}
+                           \ConstantTok{NA\_character\_}\NormalTok{,}
+\NormalTok{                           Health\_Track),}
+    \AttributeTok{Choice\_Order =} \FunctionTok{factor}\NormalTok{(Choice\_Order,}
+                          \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"First\_choice\_health\_track"}\NormalTok{,}
+                                     \StringTok{"Second\_choice\_health\_track"}\NormalTok{,}
+                                     \StringTok{"Third\_choice\_health\_track"}\NormalTok{,}
+                                     \StringTok{"Fourth\_choice\_health\_track"}\NormalTok{,}
+                                     \StringTok{"Fifth\_choice\_health\_track"}\NormalTok{),}
+                          \AttributeTok{labels =} \FunctionTok{c}\NormalTok{(}\StringTok{"1st"}\NormalTok{, }\StringTok{"2nd"}\NormalTok{, }\StringTok{"3rd"}\NormalTok{, }\StringTok{"4th"}\NormalTok{, }\StringTok{"5th"}\NormalTok{))}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(Health\_Track))}
+
+\CommentTok{\# Count number of respondents per Health\_Track and Choice\_Order}
+\NormalTok{data\_count }\OtherTok{\textless{}{-}}\NormalTok{ health\_track\_long\_2 }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Health\_Track, Choice\_Order) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{count =} \FunctionTok{n}\NormalTok{(), }\AttributeTok{.groups =} \StringTok{"drop"}\NormalTok{)}
+
+\CommentTok{\# Reorder health tracks by overall frequency}
+\NormalTok{health\_levels }\OtherTok{\textless{}{-}}\NormalTok{ health\_track\_long\_2 }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{count}\NormalTok{(Health\_Track) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(n)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pull}\NormalTok{(Health\_Track)}
+
+\NormalTok{data\_count }\OtherTok{\textless{}{-}}\NormalTok{ data\_count }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Health\_Track =} \FunctionTok{factor}\NormalTok{(Health\_Track, }\AttributeTok{levels =}\NormalTok{ health\_levels),}
+         \AttributeTok{Choice\_Order =} \FunctionTok{fct\_rev}\NormalTok{(Choice\_Order))  }\CommentTok{\# Reverse choice order (5th {-}\textgreater{} 1st)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot with counts inside bars}
+\FunctionTok{ggplot}\NormalTok{(data\_count, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Health\_Track, }\AttributeTok{y =}\NormalTok{ count, }\AttributeTok{fill =}\NormalTok{ Choice\_Order)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_col}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{geom\_text}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label =}\NormalTok{ count), }\AttributeTok{position =} \FunctionTok{position\_stack}\NormalTok{(}\AttributeTok{vjust =} \FloatTok{0.5}\NormalTok{), }\AttributeTok{size =} \DecValTok{3}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_flip}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_brewer}\NormalTok{(}\AttributeTok{palette =} \StringTok{"Blues"}\NormalTok{, }\AttributeTok{direction =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Number of Respondents by Health Track and Choice Order"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Health Track"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Number of Respondents"}\NormalTok{,}
+    \AttributeTok{fill =} \StringTok{"Choice Order"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{14}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{EBEP1_analysis_files/figure-latex/health track second plot-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}
+\NormalTok{    Current\_track,}
+\NormalTok{    PASS\_before\_LAS,}
+\NormalTok{    Current\_study\_year,}
+\NormalTok{    LAS\_chosen\_first,}
+\NormalTok{    LAS\_major,}
+\NormalTok{    LAS\_major\_first\_choice,}
+\NormalTok{    LAS\_continue\_if\_failed,}
+\NormalTok{    PASS\_chosen\_first,}
+\NormalTok{    PASS\_minor,}
+\NormalTok{    PASS\_minor\_first\_choice,}
+\NormalTok{    PASS\_continue\_if\_failed}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{tbl\_summary}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Table printed with `knitr::kable()`, not {gt}. Learn why at
+## https://www.danieldsjoberg.com/gtsummary/articles/rmarkdown.html
+## To suppress this message, include `message = FALSE` in code chunk header.
+\end{verbatim}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.8544}}
+  >{\centering\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.1456}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\textbf{Characteristic}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+\textbf{N = 5,443}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Current\_track & \\
+LAS, Health Access License & 1,650 (30\%) \\
+LSPS, Licence Science for Health, unique model in Strasbourg, Reims or
+Lille Catholique & 418 (7.7\%) \\
+PASS, Specific Health Access Pathway & 3,375 (62\%) \\
+PASS\_before\_LAS & 478 (29\%) \\
+Unknown & 3,793 \\
+Current\_study\_year & \\
+LAS 1 & 946 (57\%) \\
+LAS 2 & 594 (36\%) \\
+LAS 3 & 110 (6.7\%) \\
+Unknown & 3,793 \\
+LAS\_chosen\_first & \\
+First choice & 771 (82\%) \\
+I initially wanted to join the PASS stream & 175 (18\%) \\
+Unknown & 4,497 \\
+LAS\_major & \\
+Biology & 471 (29\%) \\
+Health sciences/STAPS & 302 (18\%) \\
+Humanities\_SocialSciences\_Law\_and\_Arts & 517 (31\%) \\
+Mathematics & 40 (2.4\%) \\
+Mechanics/Engineering sciences/Computer science/Electronics & 19
+(1.2\%) \\
+Other & 170 (10\%) \\
+Physics/Physical Chemistry/Chemistry & 131 (7.9\%) \\
+Unknown & 3,793 \\
+LAS\_major\_first\_choice & \\
+no & 351 (21\%) \\
+Yes & 1,299 (79\%) \\
+Unknown & 3,793 \\
+LAS\_continue\_if\_failed & \\
+1 Strongly disagree & 423 (26\%) \\
+2 Somewhat disagree & 256 (16\%) \\
+3 Neutral & 265 (16\%) \\
+4 Somewhat agree & 561 (34\%) \\
+5 Totally agree & 145 (8.8\%) \\
+Unknown & 3,793 \\
+PASS\_chosen\_first & \\
+First choice & 3,327 (99\%) \\
+I originally wanted to join the LAS stream & 48 (1.4\%) \\
+Unknown & 2,068 \\
+PASS\_minor & \\
+Biology & 523 (15\%) \\
+Health sciences/STAPS & 193 (5.7\%) \\
+Humanities\_SocialSciences\_Law\_and\_Arts & 763 (23\%) \\
+Mathematics & 109 (3.2\%) \\
+Mechanics/Engineering sciences/Computer science/Electronics & 55
+(1.6\%) \\
+Other & 957 (28\%) \\
+Physics/Physical Chemistry/Chemistry & 619 (18\%) \\
+STAPS & 156 (4.6\%) \\
+Unknown & 2,068 \\
+PASS\_minor\_first\_choice & 2,644 (78\%) \\
+Unknown & 2,068 \\
+PASS\_continue\_if\_failed & \\
+1 Strongly disagree & 634 (19\%) \\
+2 Somewhat disagree & 536 (16\%) \\
+3 Neutral & 628 (19\%) \\
+4 Somewhat agree & 1,363 (40\%) \\
+5 Totally agree & 214 (6.3\%) \\
+Unknown & 2,068 \\
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Reponse\_EBE\_P1\_for\_summary\_withoutscore }\OtherTok{\textless{}{-}}
+\NormalTok{  Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}
+    \SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"Psychoactive"}\NormalTok{),}
+    \SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"Psychotropic"}\NormalTok{),}
+    \CommentTok{\# {-}all\_of(HAD\_correspondance$Code), \#Finally we keep it just not a score}
+    \SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"HighSchool\_Last\_Year\_specialty\_"}\NormalTok{), }
+    \SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"HighSchool\_SecondLast\_Year\_specialty\_"}\NormalTok{), }
+    \SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"Baccalaureate\_Field"}\NormalTok{), }
+    \SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"University"}\NormalTok{),}
+    \SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"Info\_source\_"}\NormalTok{),}
+    \SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"Violence\_suffered\_from\_"}\NormalTok{),}
+   \CommentTok{\# {-}contains("Violence\_type\_"),}
+    \SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"Tutoring\_service\_looked\_for\_"}\NormalTok{),}
+    \SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"Private\_preparation\_service\_looked\_for\_"}\NormalTok{),}
+   \SpecialCharTok{{-}}\FunctionTok{matches}\NormalTok{(}\StringTok{"Academic\_pre\_entry\_(?!.*No)"}\NormalTok{, }\AttributeTok{perl =} \ConstantTok{TRUE}\NormalTok{),}
+    \SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"Workplace\_"}\NormalTok{),}
+    \SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"Suicidal\_thoughts\_Frequency\_"}\NormalTok{),}
+   \SpecialCharTok{{-}}\FunctionTok{matches}\NormalTok{(}\StringTok{"health\_track(?!.*First)"}\NormalTok{, }\AttributeTok{perl =} \ConstantTok{TRUE}\NormalTok{),}
+  \SpecialCharTok{{-}}\FunctionTok{matches}\NormalTok{(}\StringTok{"Psychiatric\_history\_(?!.*(Yes|Eating|Anxiety|Depression))"}\NormalTok{, }\AttributeTok{perl =} \ConstantTok{TRUE}\NormalTok{),}
+  \SpecialCharTok{{-}}\FunctionTok{matches}\NormalTok{(}\StringTok{"Violence\_type\_(?!.*(Moral|Discrimination))"}\NormalTok{, }\AttributeTok{perl =} \ConstantTok{TRUE}\NormalTok{),}
+   \SpecialCharTok{{-}}\NormalTok{PASS\_before\_LAS,}
+    \SpecialCharTok{{-}}\NormalTok{Current\_study\_year,}
+    \SpecialCharTok{{-}}\NormalTok{LAS\_chosen\_first,}
+    \SpecialCharTok{{-}}\NormalTok{LAS\_major,}
+    \SpecialCharTok{{-}}\NormalTok{LAS\_major\_first\_choice,}
+    \SpecialCharTok{{-}}\NormalTok{LAS\_continue\_if\_failed,}
+    \SpecialCharTok{{-}}\NormalTok{PASS\_chosen\_first,}
+    \SpecialCharTok{{-}}\NormalTok{PASS\_minor,}
+    \SpecialCharTok{{-}}\NormalTok{PASS\_minor\_first\_choice,}
+    \SpecialCharTok{{-}}\NormalTok{PASS\_continue\_if\_failed}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as\_tibble}\NormalTok{() }
+
+\NormalTok{Reponse\_EBE\_P1\_for\_summary }\OtherTok{\textless{}{-}}
+  \FunctionTok{cbind}\NormalTok{(Reponse\_EBE\_P1\_for\_summary\_withoutscore, All\_scores)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Age }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Age,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"between 18 and 20 years"}\NormalTok{, }\StringTok{"between 21 and 23"}\NormalTok{, }\StringTok{"24 years and over"}\NormalTok{)}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Baccalaureate\_Year }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Baccalaureate\_Year,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Before 2019 (included)"}\NormalTok{,}
+    \StringTok{"2020 Covid year"}\NormalTok{,}
+    \StringTok{"Between 2021 and 2023"}\NormalTok{, }\StringTok{"2024"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Baccalaureate\_honors }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Baccalaureate\_honors,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"No honours"}\NormalTok{,}
+    \StringTok{"Quite good"}\NormalTok{,}
+    \StringTok{"Good"}\NormalTok{,}
+    \StringTok{"Very good"}\NormalTok{,}
+    \StringTok{"Highest\_honours\_more\_than\_18out20"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Weekly\_study\_hours }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Weekly\_study\_hours,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Less than 15 hours"}\NormalTok{,}
+    \StringTok{"15 to 30 hours"}\NormalTok{,}
+    \StringTok{"30 to 45 hours"}\NormalTok{,}
+    \StringTok{"45 to 60 hours"}\NormalTok{,}
+    \StringTok{"60 to 75 hours"}\NormalTok{,}
+    \StringTok{"More than 75 hours"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Weekly\_hours\_leisure\_time }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Weekly\_hours\_leisure\_time,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Less than 5 hours"}\NormalTok{,}
+    \StringTok{"5 to 10 hours"}\NormalTok{,}
+    \StringTok{"10 to 15 hours"}\NormalTok{,}
+    \StringTok{"15 to 20 hours"}\NormalTok{,}
+    \StringTok{"More than 20 hours"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{All\_nighter\_study }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{All\_nighter\_study,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Never"}\NormalTok{,}
+    \StringTok{"Daily"}\NormalTok{,}
+    \StringTok{"Weekly"}\NormalTok{,}
+    \StringTok{"Monthly"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Weight\_change\_since\_academic\_year\_beginning }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Weight\_change\_since\_academic\_year\_beginning,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"No difference"}\NormalTok{,}
+    \StringTok{"a loss of between 5 and 10\% of your body weight"}\NormalTok{,}
+    \StringTok{"a loss of at least 10\% of your body weight"}\NormalTok{,}
+    \StringTok{"an increase of between 5 and 10\% in your weight"}\NormalTok{,}
+    \StringTok{"an increase of at least 10\% in your weight"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Distance\_home\_univversity }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Distance\_home\_univversity,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"less than 15 minutes"}\NormalTok{,}
+             \StringTok{"between 15 and 30 minutes"}\NormalTok{,}
+             \StringTok{"between 30 minutes and 1 hour"}\NormalTok{,}
+             \StringTok{"between 1h and 1h30"}\NormalTok{,}
+             \StringTok{"more than 1h30"}\NormalTok{),}
+  \AttributeTok{ordered =} \ConstantTok{TRUE}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Marital\_status }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_summary}\SpecialCharTok{$}\NormalTok{Marital\_status,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Single"}\NormalTok{, }\StringTok{"Couple"}\NormalTok{, }\StringTok{"Married or civil union"}\NormalTok{, }\StringTok{"Widowed"}\NormalTok{)}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_summary }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_for\_summary }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Tutoring\_participation\_influence =} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{    Tutoring\_participation\_influence,}
+    \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Very negative"}\NormalTok{, }\StringTok{"Negative"}\NormalTok{, }\StringTok{"Neutral"}\NormalTok{, }\StringTok{"Positive"}\NormalTok{, }\StringTok{"Very positive"}\NormalTok{),}
+    \AttributeTok{ordered =} \ConstantTok{FALSE}
+\NormalTok{  ))}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_summary }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_for\_summary }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Private\_preparation\_influence =} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{    Private\_preparation\_influence,}
+    \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Very negative"}\NormalTok{, }\StringTok{"Negative"}\NormalTok{, }\StringTok{"Neutral"}\NormalTok{, }\StringTok{"Positive"}\NormalTok{, }\StringTok{"Very positive"}\NormalTok{),}
+    \AttributeTok{ordered =} \ConstantTok{FALSE}
+\NormalTok{  ))}
+
+
+\NormalTok{Reponse\_EBE\_P1\_summary }\OtherTok{\textless{}{-}}
+\NormalTok{  Reponse\_EBE\_P1\_for\_summary }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{tbl\_summary}\NormalTok{()}
+
+\NormalTok{Reponse\_EBE\_P1\_summary }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  writexl}\SpecialCharTok{::}\FunctionTok{write\_xlsx}\NormalTok{(}\StringTok{"./Result/Reponse\_EBE\_P1\_summary.xlsx"}\NormalTok{)}
+
+
+\NormalTok{Reponse\_EBE\_P1\_summary\_gender }\OtherTok{\textless{}{-}}
+\NormalTok{  Reponse\_EBE\_P1\_for\_summary }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(Gender }\SpecialCharTok{!=} \StringTok{"Other"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{tbl\_summary}\NormalTok{(}\AttributeTok{by =} \StringTok{"Gender"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{add\_p}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{add\_q}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{bold\_p}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## There was an error in 'add_p()/add_difference()' for variable 'French_MBI_SS_learned_interesting_things', p-value omitted:
+## Error in stats::fisher.test(c("5.0", "6 Always", "4.0", "5.0", "2.0", : FEXACT erreur 7(location). LDSTP=17640 est trop petit pour ce problème,
+##   (pastp=409.795, ipn_0:=ipoin[itp=571]=863, stp[ipn_0]=410.404).
+## Augmentez la taille de l’environnement de travail ou considérez l’utilisation de ‘simulate.p.value=TRUE’.
+\end{verbatim}
+
+\begin{verbatim}
+## There was an error in 'add_p()/add_difference()' for variable 'Tutoring_participation_influence', p-value omitted:
+## Error in stats::fisher.test(structure(c(5L, 3L, 3L, NA, NA, NA, 4L, 5L, : FEXACT erreur 7(location). LDSTP=17760 est trop petit pour ce problème,
+##   (pastp=379.49, ipn_0:=ipoin[itp=554]=261, stp[ipn_0]=379.609).
+## Augmentez la taille de l’environnement de travail ou considérez l’utilisation de ‘simulate.p.value=TRUE’.
+\end{verbatim}
+
+\begin{verbatim}
+## add_q: Adjusting p-values with
+## `stats::p.adjust(x$table_body$p.value, method = "fdr")`
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Reponse\_EBE\_P1\_summary\_gender }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  writexl}\SpecialCharTok{::}\FunctionTok{write\_xlsx}\NormalTok{(}\StringTok{"./Result/Reponse\_EBE\_P1\_summary\_gender.xlsx"}\NormalTok{)}
+
+
+\NormalTok{Reponse\_EBE\_P1\_summary\_track }\OtherTok{\textless{}{-}}
+\NormalTok{  Reponse\_EBE\_P1\_for\_summary }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{tbl\_summary}\NormalTok{(}\AttributeTok{by =} \StringTok{"Current\_track"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{add\_p}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{add\_q}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{bold\_p}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## There was an error in 'add_p()/add_difference()' for variable 'Gender', p-value omitted:
+## Error in stats::fisher.test(c("Female", "Female", "Male", "Female", "Female", : FEXACT erreur 6.  LDKEY=588 est trop petit pour ce problème,
+##   (ii := key2[itp=1048] = 72414417, ldstp=17640)
+## Essayez d’augmenter la taille de l’environnement de travail et peut-être aussi 'mult'
+## There was an error in 'add_p()/add_difference()' for variable 'Baccalaureate_Year', p-value omitted:
+## Error in stats::fisher.test(structure(c(4L, 4L, 4L, 3L, 4L, 4L, 4L, 4L, : FEXACT error 501.
+## The hash table key cannot be computed because the largest key
+## is larger than the largest representable int.
+## The algorithm cannot proceed.
+## Reduce the workspace, consider using 'simulate.p.value=TRUE' or another algorithm.
+## There was an error in 'add_p()/add_difference()' for variable 'Weekly_hours_leisure_time', p-value omitted:
+## Error in stats::fisher.test(structure(c(1L, 1L, 1L, 2L, 1L, 1L, 2L, 1L, : FEXACT error 501.
+## The hash table key cannot be computed because the largest key
+## is larger than the largest representable int.
+## The algorithm cannot proceed.
+## Reduce the workspace, consider using 'simulate.p.value=TRUE' or another algorithm.
+## There was an error in 'add_p()/add_difference()' for variable 'Study_impact_on_family_life', p-value omitted:
+## Error in stats::fisher.test(c("2 Negative impact", "2 Negative impact", : FEXACT error 501.
+## The hash table key cannot be computed because the largest key
+## is larger than the largest representable int.
+## The algorithm cannot proceed.
+## Reduce the workspace, consider using 'simulate.p.value=TRUE' or another algorithm.
+## There was an error in 'add_p()/add_difference()' for variable 'French_MBI_SS_learned_interesting_things', p-value omitted:
+## Error in stats::fisher.test(c("5.0", "6 Always", "4.0", "5.0", "2.0", : FEXACT error 501.
+## The hash table key cannot be computed because the largest key
+## is larger than the largest representable int.
+## The algorithm cannot proceed.
+## Reduce the workspace, consider using 'simulate.p.value=TRUE' or another algorithm.
+## There was an error in 'add_p()/add_difference()' for variable 'French_MBI_SS_feeling_energized_goals', p-value omitted:
+## Error in stats::fisher.test(c("6 Always", "4.0", "4.0", "6 Always", "5.0", : FEXACT error 501.
+## The hash table key cannot be computed because the largest key
+## is larger than the largest representable int.
+## The algorithm cannot proceed.
+## Reduce the workspace, consider using 'simulate.p.value=TRUE' or another algorithm.
+## There was an error in 'add_p()/add_difference()' for variable 'Marital_status', p-value omitted:
+## Error in stats::fisher.test(structure(c(2L, 2L, 1L, 1L, 2L, 1L, 1L, 1L, : FEXACT error 501.
+## The hash table key cannot be computed because the largest key
+## is larger than the largest representable int.
+## The algorithm cannot proceed.
+## Reduce the workspace, consider using 'simulate.p.value=TRUE' or another algorithm.
+## There was an error in 'add_p()/add_difference()' for variable 'Dependent_children', p-value omitted:
+## Error in stats::fisher.test(c("0.0", "0.0", "0.0", "0.0", "0.0", "0.0", : FEXACT error 501.
+## The hash table key cannot be computed because the largest key
+## is larger than the largest representable int.
+## The algorithm cannot proceed.
+## Reduce the workspace, consider using 'simulate.p.value=TRUE' or another algorithm.
+## There was an error in 'add_p()/add_difference()' for variable 'Housing', p-value omitted:
+## Error in stats::fisher.test(c("In a group, sharing a flat, as a couple, etc...", : FEXACT error 501.
+## The hash table key cannot be computed because the largest key
+## is larger than the largest representable int.
+## The algorithm cannot proceed.
+## Reduce the workspace, consider using 'simulate.p.value=TRUE' or another algorithm.
+## There was an error in 'add_p()/add_difference()' for variable 'Tutoring_participation_influence', p-value omitted:
+## Error in stats::fisher.test(structure(c(5L, 3L, 3L, NA, NA, NA, 4L, 5L, : FEXACT[f3xact()] error: hash key 3e+09 > INT_MAX, kyy=2984, it[i (= nco = 4)]= 0.
+## Rather set 'simulate.p.value=TRUE'
+## 
+## There was an error in 'add_p()/add_difference()' for variable 'Tutoring_participation_can_be', p-value omitted:
+## Error in stats::fisher.test(c("Essential", "Useful", "Useful", "Useful", : FEXACT error 501.
+## The hash table key cannot be computed because the largest key
+## is larger than the largest representable int.
+## The algorithm cannot proceed.
+## Reduce the workspace, consider using 'simulate.p.value=TRUE' or another algorithm.
+## There was an error in 'add_p()/add_difference()' for variable 'Private_preparation_participation', p-value omitted:
+## Error in stats::fisher.test(c(NA, "I make partial use of the services offered", : FEXACT erreur 6.  LDKEY=609 est trop petit pour ce problème,
+##   (ii := key2[itp=615] = 24342343, ldstp=18270)
+## Essayez d’augmenter la taille de l’environnement de travail et peut-être aussi 'mult'
+## There was an error in 'add_p()/add_difference()' for variable 'Private_preparation_influence', p-value omitted:
+## Error in stats::fisher.test(structure(c(NA, 4L, NA, NA, 3L, 5L, 5L, 5L, : FEXACT erreur 6.  LDKEY=608 est trop petit pour ce problème,
+##   (ii := key2[itp=567] = 88063243, ldstp=18240)
+## Essayez d’augmenter la taille de l’environnement de travail et peut-être aussi 'mult'
+## There was an error in 'add_p()/add_difference()' for variable 'Student_job_needed', p-value omitted:
+## Error in stats::fisher.test(c("No", "No", "No", "No", "No", "No", "No", : FEXACT error 501.
+## The hash table key cannot be computed because the largest key
+## is larger than the largest representable int.
+## The algorithm cannot proceed.
+## Reduce the workspace, consider using 'simulate.p.value=TRUE' or another algorithm.
+## There was an error in 'add_p()/add_difference()' for variable 'Social_and_solidarity_grocery_store', p-value omitted:
+## Error in stats::fisher.test(c("No", "No", "No", "Yes, but I don't go there", : FEXACT error 501.
+## The hash table key cannot be computed because the largest key
+## is larger than the largest representable int.
+## The algorithm cannot proceed.
+## Reduce the workspace, consider using 'simulate.p.value=TRUE' or another algorithm.
+## add_q: Adjusting p-values with
+## `stats::p.adjust(x$table_body$p.value, method = "fdr")`
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Reponse\_EBE\_P1\_summary\_track }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  writexl}\SpecialCharTok{::}\FunctionTok{write\_xlsx}\NormalTok{(}\StringTok{"./Result/Reponse\_EBE\_P1\_summary\_track.xlsx"}\NormalTok{)}
+
+
+
+\NormalTok{Reponse\_EBE\_P1\_summary\_univr }\OtherTok{\textless{}{-}}
+  \FunctionTok{cbind}\NormalTok{(Reponse\_EBE\_P1\_for\_summary, (Reponse\_EBE\_P1\_final }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\StringTok{"University"}\NormalTok{))) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{tbl\_summary}\NormalTok{(}\AttributeTok{by =} \StringTok{"University"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{add\_overall}\NormalTok{()}
+
+\NormalTok{Reponse\_EBE\_P1\_summary\_univr }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  writexl}\SpecialCharTok{::}\FunctionTok{write\_xlsx}\NormalTok{(}\StringTok{"./Result/Reponse\_EBE\_P1\_summary\_univr.xlsx"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ordinal)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attachement du package : 'ordinal'
+\end{verbatim}
+
+\begin{verbatim}
+## L'objet suivant est masqué depuis 'package:dplyr':
+## 
+##     slice
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Reponse\_EBE\_P1\_for\_regression }\OtherTok{\textless{}{-}}
+\NormalTok{  Reponse\_EBE\_P1\_for\_summary }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{contains}\NormalTok{(}\StringTok{"Parent"}\NormalTok{),}
+         \SpecialCharTok{{-}}\NormalTok{Dependent\_children,}
+         \SpecialCharTok{{-}}\NormalTok{Scolarship\_level,}
+         \SpecialCharTok{{-}}\NormalTok{Tutoring\_participation\_can\_be,}
+         \SpecialCharTok{{-}}\NormalTok{Private\_preparation\_participation\_can\_be,}
+         \SpecialCharTok{{-}}\NormalTok{Social\_and\_solidarity\_grocery\_store}
+\NormalTok{         )}
+\NormalTok{Reponse\_EBE\_P1\_for\_regression}\SpecialCharTok{$}\NormalTok{SCOFF\_total }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(Reponse\_EBE\_P1\_for\_regression}\SpecialCharTok{$}\NormalTok{SCOFF\_total)}
+
+
+\NormalTok{translation\_map }\OtherTok{\textless{}{-}} \FunctionTok{setNames}\NormalTok{(Recode\_of\_every\_possible\_answer}\SpecialCharTok{$}\NormalTok{translation\_num,}
+\NormalTok{                            Recode\_of\_every\_possible\_answer}\SpecialCharTok{$}\NormalTok{translation)}
+
+\CommentTok{\# Fonction de recodage qui garde les valeurs non trouvées}
+\NormalTok{safe\_recode }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x, map) \{}
+\NormalTok{  recoded }\OtherTok{\textless{}{-}}\NormalTok{ map[}\FunctionTok{as.character}\NormalTok{(x)]}
+  \FunctionTok{ifelse}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(recoded), x, recoded)}
+\NormalTok{\}}
+
+\CommentTok{\# Application sur tout le dataframe}
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_for\_regression }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{everything}\NormalTok{(), }\SpecialCharTok{\textasciitilde{}} \FunctionTok{safe\_recode}\NormalTok{(., translation\_map)))}
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{SCOFF\_total }\OtherTok{\textless{}{-}}
+  \FunctionTok{as.factor}\NormalTok{(Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{SCOFF\_total)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Age }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Age,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"between 18 and 20 years"}\NormalTok{, }\StringTok{"between 21 and 23"}\NormalTok{, }\StringTok{"24 years and over"}\NormalTok{)}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Baccalaureate\_Year }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Baccalaureate\_Year,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Before 2019 (included)"}\NormalTok{,}
+    \StringTok{"2020 Covid year"}\NormalTok{,}
+    \StringTok{"Between 2021 and 2023"}\NormalTok{, }\StringTok{"2024"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Baccalaureate\_honors }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Baccalaureate\_honors,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"No honours"}\NormalTok{,}
+    \StringTok{"Quite good"}\NormalTok{,}
+    \StringTok{"Good"}\NormalTok{,}
+    \StringTok{"Very good"}\NormalTok{,}
+    \StringTok{"Highest\_honours\_more\_than\_18out20"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Weekly\_study\_hours }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Weekly\_study\_hours,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Less than 15 hours"}\NormalTok{,}
+    \StringTok{"15 to 30 hours"}\NormalTok{,}
+    \StringTok{"30 to 45 hours"}\NormalTok{,}
+    \StringTok{"45 to 60 hours"}\NormalTok{,}
+    \StringTok{"60 to 75 hours"}\NormalTok{,}
+    \StringTok{"More than 75 hours"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Weekly\_hours\_leisure\_time }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Weekly\_hours\_leisure\_time,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Less than 5 hours"}\NormalTok{,}
+    \StringTok{"5 to 10 hours"}\NormalTok{,}
+    \StringTok{"10 to 15 hours"}\NormalTok{,}
+    \StringTok{"15 to 20 hours"}\NormalTok{,}
+    \StringTok{"More than 20 hours"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{All\_nighter\_study }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{All\_nighter\_study,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Never"}\NormalTok{,}
+    \StringTok{"Daily"}\NormalTok{,}
+    \StringTok{"Weekly"}\NormalTok{,}
+    \StringTok{"Monthly"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Weight\_change\_since\_academic\_year\_beginning }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Weight\_change\_since\_academic\_year\_beginning,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"No difference"}\NormalTok{,}
+    \StringTok{"a loss of between 5 and 10\% of your body weight"}\NormalTok{,}
+    \StringTok{"a loss of at least 10\% of your body weight"}\NormalTok{,}
+    \StringTok{"an increase of between 5 and 10\% in your weight"}\NormalTok{,}
+    \StringTok{"an increase of at least 10\% in your weight"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Distance\_home\_univversity }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Distance\_home\_univversity,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"less than 15 minutes"}\NormalTok{,}
+             \StringTok{"between 15 and 30 minutes"}\NormalTok{,}
+             \StringTok{"between 30 minutes and 1 hour"}\NormalTok{,}
+             \StringTok{"between 1h and 1h30"}\NormalTok{,}
+             \StringTok{"more than 1h30"}\NormalTok{),}
+  \AttributeTok{ordered =} \ConstantTok{TRUE}
+\NormalTok{)}
+
+
+\CommentTok{\# Remplacer "Do not wish to answer" par NA}
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Violence\_suffered }\OtherTok{\textless{}{-}} \FunctionTok{as.character}\NormalTok{(Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Violence\_suffered)}
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Violence\_suffered[Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Violence\_suffered }\SpecialCharTok{==} \StringTok{"Do not wish to answer"}\NormalTok{] }\OtherTok{\textless{}{-}} \ConstantTok{NA}
+
+\CommentTok{\# Reconvertir en facteur (optionnel, selon ce que tu veux faire ensuite)}
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Violence\_suffered }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Violence\_suffered,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"No"}\NormalTok{, }\StringTok{"Yes"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# Find columns whose names contain "Violence\_type"}
+\NormalTok{violence\_cols }\OtherTok{\textless{}{-}} \FunctionTok{grep}\NormalTok{(}\StringTok{"Violence\_type"}\NormalTok{, }\FunctionTok{names}\NormalTok{(Reponse\_EBE\_P1\_for\_regression\_recoded), }\AttributeTok{value =} \ConstantTok{TRUE}\NormalTok{)}
+
+\CommentTok{\# Loop through these columns and replace "Do not wish to answer" by NA,}
+\CommentTok{\# then relevel factors with just "No" and "Yes" (dropping NA level)}
+\ControlFlowTok{for}\NormalTok{(col }\ControlFlowTok{in}\NormalTok{ violence\_cols) \{}
+  \CommentTok{\# Convert to character first}
+\NormalTok{  Reponse\_EBE\_P1\_for\_regression\_recoded[[col]] }\OtherTok{\textless{}{-}} \FunctionTok{as.character}\NormalTok{(Reponse\_EBE\_P1\_for\_regression\_recoded[[col]])}
+  
+  \CommentTok{\# Replace "Do not wish to answer" by NA}
+\NormalTok{  Reponse\_EBE\_P1\_for\_regression\_recoded[[col]][}
+\NormalTok{    Reponse\_EBE\_P1\_for\_regression\_recoded[[col]] }\SpecialCharTok{==} \StringTok{"Do not wish to answer"}
+\NormalTok{  ] }\OtherTok{\textless{}{-}} \ConstantTok{NA}
+  
+  \CommentTok{\# Convert to factor with levels "No" and "Yes" only (NA stays as missing)}
+\NormalTok{  Reponse\_EBE\_P1\_for\_regression\_recoded[[col]] }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{    Reponse\_EBE\_P1\_for\_regression\_recoded[[col]],}
+    \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"No"}\NormalTok{, }\StringTok{"Yes"}\NormalTok{)}
+\NormalTok{  )}
+\NormalTok{\}}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Marital\_status }\OtherTok{\textless{}{-}} 
+  \FunctionTok{factor}\NormalTok{(Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Marital\_status,}
+                            \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Single"}\NormalTok{, }\StringTok{"Couple"}\NormalTok{, }\StringTok{"Married or civil union"}\NormalTok{, }\StringTok{"Widowed"}\NormalTok{))}
+
+
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Tutoring\_participation\_influence =} \FunctionTok{factor}\NormalTok{(Tutoring\_participation\_influence,}
+                                                \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Very negative"}\NormalTok{, }\StringTok{"Negative"}\NormalTok{, }\StringTok{"Neutral"}\NormalTok{, }\StringTok{"Positive"}\NormalTok{, }\StringTok{"Very positive"}\NormalTok{),}
+                                                \AttributeTok{ordered =}\NormalTok{ F))}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Private\_preparation\_influence =} \FunctionTok{factor}\NormalTok{(Private\_preparation\_influence,}
+                                                   \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Very negative"}\NormalTok{, }\StringTok{"Negative"}\NormalTok{, }\StringTok{"Neutral"}\NormalTok{, }\StringTok{"Positive"}\NormalTok{, }\StringTok{"Very positive"}\NormalTok{),}
+                                                   \AttributeTok{ordered =}\NormalTok{ F))}
+
+\CommentTok{\# Create a named vector for mapping}
+\NormalTok{translation\_map }\OtherTok{\textless{}{-}} \FunctionTok{setNames}\NormalTok{(Recode\_of\_every\_possible\_answer}\SpecialCharTok{$}\NormalTok{translation\_num,}
+\NormalTok{                            Recode\_of\_every\_possible\_answer}\SpecialCharTok{$}\NormalTok{translation)}
+
+\CommentTok{\# Fonction de recodage qui garde les valeurs non trouvées}
+\NormalTok{safe\_recode }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x, map) \{}
+\NormalTok{  recoded }\OtherTok{\textless{}{-}}\NormalTok{ map[}\FunctionTok{as.character}\NormalTok{(x)]}
+  \FunctionTok{ifelse}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(recoded), x, recoded)}
+\NormalTok{\}}
+
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded }\OtherTok{\textless{}{-}}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\FunctionTok{across}\NormalTok{(}
+    \FunctionTok{where}\NormalTok{(}\SpecialCharTok{\textasciitilde{}} \FunctionTok{is.character}\NormalTok{(.x) }\SpecialCharTok{\&\&} \FunctionTok{all}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(}\FunctionTok{suppressWarnings}\NormalTok{(}\FunctionTok{as.numeric}\NormalTok{(.x))))),}
+    \SpecialCharTok{\textasciitilde{}} \FunctionTok{as.numeric}\NormalTok{(.x)}
+\NormalTok{  ))}
+
+
+
+
+
+
+
+
+
+\NormalTok{univariate\_lm\_analysis }\OtherTok{\textless{}{-}}
+  \ControlFlowTok{function}\NormalTok{(data, var\_to\_explain, explanatory\_vars)\{}
+\NormalTok{    explanatory\_vars }\SpecialCharTok{\%\textgreater{}\%}       \CommentTok{\# begin with variables of interest}
+      \FunctionTok{str\_c}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(var\_to\_explain, }\StringTok{" \textasciitilde{} "}\NormalTok{), .) }\SpecialCharTok{\%\textgreater{}\%}         \CommentTok{\# combine each variable into formula ("outcome \textasciitilde{} variable of interest")}
+      \CommentTok{\# iterate through each univariate formula}
+      \FunctionTok{map}\NormalTok{(                               }
+        \AttributeTok{.f =} \SpecialCharTok{\textasciitilde{}}\FunctionTok{lm}\NormalTok{(                       }\CommentTok{\# pass the formulas one{-}by{-}one to glm()}
+          \AttributeTok{formula =} \FunctionTok{as.formula}\NormalTok{(.x),      }\CommentTok{\# within glm(), the string formula is .x}
+          \AttributeTok{data =}\NormalTok{ data)) }\SpecialCharTok{\%\textgreater{}\%}       \CommentTok{\# dataset}
+      \CommentTok{\# tidy up each of the glm regression outputs from above}
+      \FunctionTok{map}\NormalTok{(}
+        \AttributeTok{.f =} \SpecialCharTok{\textasciitilde{}}\FunctionTok{tbl\_regression}\NormalTok{(}
+\NormalTok{          .x)) }\SpecialCharTok{\%\textgreater{}\%}
+      \FunctionTok{tbl\_stack}\NormalTok{()}
+\NormalTok{  \}}
+
+\NormalTok{multivariate\_lm\_analysis\_m1AgeGender }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(data, var\_to\_explain, explanatory\_vars) \{}
+\NormalTok{  explanatory\_vars }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{map}\NormalTok{(}\ControlFlowTok{function}\NormalTok{(var) \{}
+\NormalTok{      formula\_str }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(var\_to\_explain, }\StringTok{" \textasciitilde{} Age + Gender + Current\_track + "}\NormalTok{, var)}
+\NormalTok{      model }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(}\AttributeTok{formula =} \FunctionTok{as.formula}\NormalTok{(formula\_str), }\AttributeTok{data =}\NormalTok{ data)}
+      
+      \FunctionTok{tbl\_regression}\NormalTok{(}
+\NormalTok{        model,}
+        \AttributeTok{include =} \FunctionTok{all\_of}\NormalTok{(var)  }\CommentTok{\# show only the main tested variable}
+\NormalTok{      )}
+\NormalTok{    \}) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{tbl\_stack}\NormalTok{()}
+\NormalTok{\}}
+
+
+\NormalTok{multivariate\_lm\_analysis\_m2\_forWarwick\_Edinburg\_total }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(data, var\_to\_explain, explanatory\_vars) \{}
+\NormalTok{  explanatory\_vars }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{map}\NormalTok{(}\ControlFlowTok{function}\NormalTok{(var) \{}
+\NormalTok{      formula\_str }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(var\_to\_explain, }\StringTok{" \textasciitilde{} Academic\_Efficacy + Cynicism + Emotional\_Exhaustion + SCOFF\_total + "}\NormalTok{, var)}
+\NormalTok{      model }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(}\AttributeTok{formula =} \FunctionTok{as.formula}\NormalTok{(formula\_str), }\AttributeTok{data =}\NormalTok{ data)}
+      
+      \FunctionTok{tbl\_regression}\NormalTok{(}
+\NormalTok{        model,}
+        \AttributeTok{include =} \FunctionTok{all\_of}\NormalTok{(var)  }\CommentTok{\# show only the main tested variable}
+\NormalTok{      )}
+\NormalTok{    \}) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{tbl\_stack}\NormalTok{()}
+\NormalTok{\}}
+
+
+\NormalTok{multivariate\_lm\_analysis\_m2\_for\_Academic }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(data, var\_to\_explain, explanatory\_vars) \{}
+\NormalTok{  explanatory\_vars }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{map}\NormalTok{(}\ControlFlowTok{function}\NormalTok{(var) \{}
+\NormalTok{      formula\_str }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(var\_to\_explain, }\StringTok{" \textasciitilde{} Warwick\_Edinburg\_total + Cynicism + Emotional\_Exhaustion + SCOFF\_total + "}\NormalTok{, var)}
+\NormalTok{      model }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(}\AttributeTok{formula =} \FunctionTok{as.formula}\NormalTok{(formula\_str), }\AttributeTok{data =}\NormalTok{ data)}
+      
+      \FunctionTok{tbl\_regression}\NormalTok{(}
+\NormalTok{        model,}
+        \AttributeTok{include =} \FunctionTok{all\_of}\NormalTok{(var)  }\CommentTok{\# show only the main tested variable}
+\NormalTok{      )}
+\NormalTok{    \}) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{tbl\_stack}\NormalTok{()}
+\NormalTok{\}}
+\NormalTok{multivariate\_lm\_analysis\_m2\_forcynism }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(data, var\_to\_explain, explanatory\_vars) \{}
+\NormalTok{  explanatory\_vars }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{map}\NormalTok{(}\ControlFlowTok{function}\NormalTok{(var) \{}
+\NormalTok{      formula\_str }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(var\_to\_explain, }\StringTok{" \textasciitilde{} Academic\_Efficacy + Warwick\_Edinburg\_total + Emotional\_Exhaustion + SCOFF\_total + "}\NormalTok{, var)}
+\NormalTok{      model }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(}\AttributeTok{formula =} \FunctionTok{as.formula}\NormalTok{(formula\_str), }\AttributeTok{data =}\NormalTok{ data)}
+      
+      \FunctionTok{tbl\_regression}\NormalTok{(}
+\NormalTok{        model,}
+        \AttributeTok{include =} \FunctionTok{all\_of}\NormalTok{(var)  }\CommentTok{\# show only the main tested variable}
+\NormalTok{      )}
+\NormalTok{    \}) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{tbl\_stack}\NormalTok{()}
+\NormalTok{\}}
+
+
+
+\NormalTok{multivariate\_lm\_analysis\_m2\_foremotionalexhaustion }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(data, var\_to\_explain, explanatory\_vars) \{}
+\NormalTok{  explanatory\_vars }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{map}\NormalTok{(}\ControlFlowTok{function}\NormalTok{(var) \{}
+\NormalTok{      formula\_str }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(var\_to\_explain, }\StringTok{" \textasciitilde{} Academic\_Efficacy + Cynicism + Warwick\_Edinburg\_total + SCOFF\_total + "}\NormalTok{, var)}
+\NormalTok{      model }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(}\AttributeTok{formula =} \FunctionTok{as.formula}\NormalTok{(formula\_str), }\AttributeTok{data =}\NormalTok{ data)}
+      
+      \FunctionTok{tbl\_regression}\NormalTok{(}
+\NormalTok{        model,}
+        \AttributeTok{include =} \FunctionTok{all\_of}\NormalTok{(var)  }\CommentTok{\# show only the main tested variable}
+\NormalTok{      )}
+\NormalTok{    \}) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{tbl\_stack}\NormalTok{()}
+\NormalTok{\}}
+
+
+
+\NormalTok{univariate\_clm\_analysis }\OtherTok{\textless{}{-}}
+  \ControlFlowTok{function}\NormalTok{(data, var\_to\_explain, explanatory\_vars)\{}
+\NormalTok{    explanatory\_vars }\SpecialCharTok{\%\textgreater{}\%}       \CommentTok{\# begin with variables of interest}
+      \FunctionTok{str\_c}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(var\_to\_explain, }\StringTok{" \textasciitilde{} "}\NormalTok{), .) }\SpecialCharTok{\%\textgreater{}\%}         \CommentTok{\# combine each variable into formula ("outcome \textasciitilde{} variable of interest")}
+      \CommentTok{\# iterate through each univariate formula}
+      \FunctionTok{map}\NormalTok{(                               }
+        \AttributeTok{.f =} \SpecialCharTok{\textasciitilde{}}\FunctionTok{clm}\NormalTok{(                       }\CommentTok{\# pass the formulas one{-}by{-}one to glm()}
+          \AttributeTok{formula =} \FunctionTok{as.formula}\NormalTok{(.x),      }\CommentTok{\# within glm(), the string formula is .x}
+          \AttributeTok{data =}\NormalTok{ data)) }\SpecialCharTok{\%\textgreater{}\%}       \CommentTok{\# dataset}
+      \CommentTok{\# tidy up each of the glm regression outputs from above}
+      \FunctionTok{map}\NormalTok{(}
+        \AttributeTok{.f =} \SpecialCharTok{\textasciitilde{}}\FunctionTok{tbl\_regression}\NormalTok{(}
+\NormalTok{          .x,}
+          \AttributeTok{exp =}\NormalTok{ T)) }\SpecialCharTok{\%\textgreater{}\%}
+      \FunctionTok{tbl\_stack}\NormalTok{()}
+\NormalTok{  \}}
+
+
+\NormalTok{multivariate\_clm\_analysis\_m1AgeGender }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(data, var\_to\_explain, explanatory\_vars) \{}
+\NormalTok{  explanatory\_vars }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{map}\NormalTok{(}\ControlFlowTok{function}\NormalTok{(var) \{}
+\NormalTok{      formula\_str }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(var\_to\_explain, }\StringTok{" \textasciitilde{} Age + Gender + Current\_track + "}\NormalTok{, var)}
+\NormalTok{      model }\OtherTok{\textless{}{-}} \FunctionTok{clm}\NormalTok{(}\AttributeTok{formula =} \FunctionTok{as.formula}\NormalTok{(formula\_str), }\AttributeTok{data =}\NormalTok{ data)}
+      
+      \FunctionTok{tbl\_regression}\NormalTok{(}
+\NormalTok{        model,}
+        \AttributeTok{include =} \FunctionTok{all\_of}\NormalTok{(var),  }\CommentTok{\# inclure uniquement la variable d’intérêt}
+        \AttributeTok{exponentiate =} \ConstantTok{TRUE}
+\NormalTok{      )}
+\NormalTok{    \}) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{tbl\_stack}\NormalTok{()}
+\NormalTok{\}}
+
+
+
+
+\NormalTok{multivariate\_clm\_analysis\_m2Burnout\_wellbeing }\OtherTok{\textless{}{-}}
+  \ControlFlowTok{function}\NormalTok{(data, var\_to\_explain, explanatory\_vars) \{}
+\NormalTok{  explanatory\_vars }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{map}\NormalTok{(}\ControlFlowTok{function}\NormalTok{(var) \{}
+\NormalTok{      formula\_str }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(var\_to\_explain, }\StringTok{" \textasciitilde{} Academic\_Efficacy + Cynicism + Emotional\_Exhaustion + Warwick\_Edinburg\_total + "}\NormalTok{, var)}
+\NormalTok{      model }\OtherTok{\textless{}{-}} \FunctionTok{clm}\NormalTok{(}\AttributeTok{formula =} \FunctionTok{as.formula}\NormalTok{(formula\_str), }\AttributeTok{data =}\NormalTok{ data)}
+      
+      \FunctionTok{tbl\_regression}\NormalTok{(}
+\NormalTok{        model,}
+        \AttributeTok{include =} \FunctionTok{all\_of}\NormalTok{(var),  }\CommentTok{\# inclure uniquement la variable d’intérêt}
+        \AttributeTok{exponentiate =} \ConstantTok{TRUE}
+\NormalTok{      )}
+\NormalTok{    \}) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{tbl\_stack}\NormalTok{()}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{clm\_univariateSCOFF }\OtherTok{\textless{}{-}}
+  \FunctionTok{univariate\_clm\_analysis}\NormalTok{(}\AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded, }
+                        \AttributeTok{var\_to\_explain =} \StringTok{"SCOFF\_total"}\NormalTok{, }
+                        \AttributeTok{explanatory\_vars =}
+                          \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{                            Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{                              dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"SCOFF\_total"}\NormalTok{))))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: (1) Hessian is numerically singular: parameters are not uniquely determined 
+## In addition: Absolute convergence criterion was met, but relative criterion was not met
+\end{verbatim}
+
+\begin{verbatim}
+## ! `broom::tidy()` failed to tidy the model.
+\end{verbatim}
+
+\begin{verbatim}
+## v `tidy_parameters()` used instead.
+\end{verbatim}
+
+\begin{verbatim}
+## i Add `tidy_fun = broom.helpers::tidy_parameters` to quiet these messages.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{clm\_SCOFF\_m1 }\OtherTok{\textless{}{-}}
+  \FunctionTok{multivariate\_clm\_analysis\_m1AgeGender}\NormalTok{(}\AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded, }
+                        \AttributeTok{var\_to\_explain =} \StringTok{"SCOFF\_total"}\NormalTok{, }
+                        \AttributeTok{explanatory\_vars =}
+                          \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{                            Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{                              dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"SCOFF\_total"}\NormalTok{, }\StringTok{"Age"}\NormalTok{, }\StringTok{"Gender"}\NormalTok{, }\StringTok{"Current\_track"}\NormalTok{))))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: (1) Hessian is numerically singular: parameters are not uniquely determined 
+## In addition: Absolute convergence criterion was met, but relative criterion was not met
+\end{verbatim}
+
+\begin{verbatim}
+## ! `broom::tidy()` failed to tidy the model.
+\end{verbatim}
+
+\begin{verbatim}
+## v `tidy_parameters()` used instead.
+\end{verbatim}
+
+\begin{verbatim}
+## i Add `tidy_fun = broom.helpers::tidy_parameters` to quiet these messages.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{clm\_SCOFF\_m2 }\OtherTok{\textless{}{-}}
+  \FunctionTok{multivariate\_clm\_analysis\_m2Burnout\_wellbeing}\NormalTok{(}\AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded, }
+                        \AttributeTok{var\_to\_explain =} \StringTok{"SCOFF\_total"}\NormalTok{, }
+                        \AttributeTok{explanatory\_vars =}
+                          \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{                            Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{                              dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"SCOFF\_total"}\NormalTok{, }\StringTok{"Academic\_Efficacy"}\NormalTok{, }
+                                               \StringTok{"Cynicism"}\NormalTok{,}
+                                   \StringTok{"Emotional\_Exhaustion"}\NormalTok{, }\StringTok{"Warwick\_Edinburg\_total"}\NormalTok{))))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: (1) Hessian is numerically singular: parameters are not uniquely determined 
+## In addition: Absolute convergence criterion was met, but relative criterion was not met
+\end{verbatim}
+
+\begin{verbatim}
+## ! `broom::tidy()` failed to tidy the model.
+\end{verbatim}
+
+\begin{verbatim}
+## v `tidy_parameters()` used instead.
+\end{verbatim}
+
+\begin{verbatim}
+## i Add `tidy_fun = broom.helpers::tidy_parameters` to quiet these messages.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tbl\_SCOFF\_merged }\OtherTok{\textless{}{-}}
+  \FunctionTok{tbl\_merge}\NormalTok{(}
+  \AttributeTok{tbls =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{    clm\_univariateSCOFF,}
+\NormalTok{    clm\_SCOFF\_m1,}
+\NormalTok{    clm\_SCOFF\_m2}
+\NormalTok{  ),}
+  \AttributeTok{tab\_spanner =} \FunctionTok{c}\NormalTok{(}\StringTok{"**Univariate clm (SCOFF)**"}\NormalTok{,}
+                  \StringTok{"**Multivariate clm m1: + Age + Gender + Current\_track**"}\NormalTok{,}
+                  \StringTok{"**Multivariate clm m2: + Burnout + Well{-}being**"}\NormalTok{)}
+\NormalTok{)}
+
+\NormalTok{tbl\_SCOFF\_merged }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  writexl}\SpecialCharTok{::}\FunctionTok{write\_xlsx}\NormalTok{(}\StringTok{"./Result/tbl\_SCOFF\_merged.xlsx"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Warwick\_Edinburg\_total }\OtherTok{\textless{}{-}}
+  \FunctionTok{as.numeric}\NormalTok{(Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Warwick\_Edinburg\_total )}
+
+\NormalTok{lm\_univariateWE }\OtherTok{\textless{}{-}}
+  \FunctionTok{univariate\_lm\_analysis}\NormalTok{(}\AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded, }
+                        \AttributeTok{var\_to\_explain =} \StringTok{"Warwick\_Edinburg\_total"}\NormalTok{, }
+                        \AttributeTok{explanatory\_vars =}
+                          \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{                            Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{                              dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"Warwick\_Edinburg\_total"}\NormalTok{))))}
+
+
+\NormalTok{lm\_multivariateWE\_m1 }\OtherTok{\textless{}{-}}
+  \FunctionTok{multivariate\_lm\_analysis\_m1AgeGender}\NormalTok{(}\AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded, }
+                        \AttributeTok{var\_to\_explain =} \StringTok{"Warwick\_Edinburg\_total"}\NormalTok{, }
+                        \AttributeTok{explanatory\_vars =}
+                          \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{                            Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{                              dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"Warwick\_Edinburg\_total"}\NormalTok{, }\StringTok{"Age"}\NormalTok{, }\StringTok{"Gender"}\NormalTok{, }\StringTok{"Current\_track"}\NormalTok{))))}
+
+
+\NormalTok{lm\_multivariateWE\_m2 }\OtherTok{\textless{}{-}}
+  \FunctionTok{multivariate\_lm\_analysis\_m2\_forWarwick\_Edinburg\_total}\NormalTok{(}\AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded, }
+                        \AttributeTok{var\_to\_explain =} \StringTok{"Warwick\_Edinburg\_total"}\NormalTok{, }
+                        \AttributeTok{explanatory\_vars =}
+                          \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{                            Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{                              dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"SCOFF\_total"}\NormalTok{, }\StringTok{"Academic\_Efficacy"}\NormalTok{, }
+                                               \StringTok{"Cynicism"}\NormalTok{,}
+                                   \StringTok{"Emotional\_Exhaustion"}\NormalTok{, }\StringTok{"Warwick\_Edinburg\_total"}\NormalTok{))))}
+
+\NormalTok{tbl\_WE\_merged }\OtherTok{\textless{}{-}}
+  \FunctionTok{tbl\_merge}\NormalTok{(}
+  \AttributeTok{tbls =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{    lm\_univariateWE,}
+\NormalTok{    lm\_multivariateWE\_m1,}
+\NormalTok{    lm\_multivariateWE\_m2}
+\NormalTok{  ),}
+  \AttributeTok{tab\_spanner =} \FunctionTok{c}\NormalTok{(}\StringTok{"**Univariate lm (Warwick Edinburg)**"}\NormalTok{,}
+                  \StringTok{"**Multivariate lm m1: + Age + Gender + Current\_track**"}\NormalTok{,}
+                  \StringTok{"**Multivariate lm m2: + Burnout + TCA**"}\NormalTok{)}
+\NormalTok{)}
+
+\NormalTok{tbl\_WE\_merged }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  writexl}\SpecialCharTok{::}\FunctionTok{write\_xlsx}\NormalTok{(}\StringTok{"./Result/tbl\_WE\_merged.xlsx"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# S\textquotesingle{}assurer que la variable est numérique}
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Emotional\_Exhaustion }\OtherTok{\textless{}{-}}
+  \FunctionTok{as.numeric}\NormalTok{(Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Emotional\_Exhaustion)}
+
+\CommentTok{\# Univarié}
+\NormalTok{lm\_univariateEE }\OtherTok{\textless{}{-}}
+  \FunctionTok{univariate\_lm\_analysis}\NormalTok{(}\AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded, }
+                         \AttributeTok{var\_to\_explain =} \StringTok{"Emotional\_Exhaustion"}\NormalTok{, }
+                         \AttributeTok{explanatory\_vars =}
+                           \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{                             Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{                               dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"Emotional\_Exhaustion"}\NormalTok{))))}
+
+\CommentTok{\# Multivarié m1 : ajusté pour Age + Gender + Current\_track}
+\NormalTok{lm\_multivariateEE\_m1 }\OtherTok{\textless{}{-}}
+  \FunctionTok{multivariate\_lm\_analysis\_m1AgeGender}\NormalTok{(}\AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded, }
+                                       \AttributeTok{var\_to\_explain =} \StringTok{"Emotional\_Exhaustion"}\NormalTok{, }
+                                       \AttributeTok{explanatory\_vars =}
+                                         \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{                                           Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{                                             dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"Emotional\_Exhaustion"}\NormalTok{, }\StringTok{"Age"}\NormalTok{, }\StringTok{"Gender"}\NormalTok{, }\StringTok{"Current\_track"}\NormalTok{))))}
+
+
+
+
+\CommentTok{\# Multivarié m2 : ajusté pour bien{-}être \& autres dimensions du burnout}
+\NormalTok{lm\_multivariateEE\_m2 }\OtherTok{\textless{}{-}}
+  \FunctionTok{multivariate\_lm\_analysis\_m2\_foremotionalexhaustion}\NormalTok{(}\AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded, }
+                                                        \AttributeTok{var\_to\_explain =} \StringTok{"Emotional\_Exhaustion"}\NormalTok{, }
+                                                        \AttributeTok{explanatory\_vars =}
+                                                          \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{                                                            Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{                                                              dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"SCOFF\_total"}\NormalTok{, }\StringTok{"Academic\_Efficacy"}\NormalTok{, }
+                                                                               \StringTok{"Cynicism"}\NormalTok{,}
+                                                                               \StringTok{"Emotional\_Exhaustion"}\NormalTok{, }\StringTok{"Warwick\_Edinburg\_total"}\NormalTok{))))}
+
+\CommentTok{\# Tableau fusionné}
+\NormalTok{tbl\_EE\_merged }\OtherTok{\textless{}{-}}
+  \FunctionTok{tbl\_merge}\NormalTok{(}
+    \AttributeTok{tbls =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{      lm\_univariateEE,}
+\NormalTok{      lm\_multivariateEE\_m1,}
+\NormalTok{      lm\_multivariateEE\_m2}
+\NormalTok{    ),}
+    \AttributeTok{tab\_spanner =} \FunctionTok{c}\NormalTok{(}\StringTok{"**Univariate lm (Emotional Exhaustion)**"}\NormalTok{,}
+                    \StringTok{"**Multivariate lm m1: + Age + Gender + Current\_track**"}\NormalTok{,}
+                    \StringTok{"**Multivariate lm m2: + Burnout + Well{-}being**"}\NormalTok{)}
+\NormalTok{  )}
+
+\NormalTok{tbl\_EE\_merged }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  writexl}\SpecialCharTok{::}\FunctionTok{write\_xlsx}\NormalTok{(}\StringTok{"./Result/tbl\_EE\_MBISS\_merged.xlsx"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# S\textquotesingle{}assurer que la variable est numérique}
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Cynicism }\OtherTok{\textless{}{-}}
+  \FunctionTok{as.numeric}\NormalTok{(Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Cynicism)}
+
+\CommentTok{\# Univarié}
+\NormalTok{lm\_univariateCY }\OtherTok{\textless{}{-}}
+  \FunctionTok{univariate\_lm\_analysis}\NormalTok{(}\AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded, }
+                         \AttributeTok{var\_to\_explain =} \StringTok{"Cynicism"}\NormalTok{, }
+                         \AttributeTok{explanatory\_vars =}
+                           \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{                             Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{                               dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"Cynicism"}\NormalTok{))))}
+
+\CommentTok{\# Multivarié m1 : ajusté pour Age + Gender + Current\_track}
+\NormalTok{lm\_multivariateCY\_m1 }\OtherTok{\textless{}{-}}
+  \FunctionTok{multivariate\_lm\_analysis\_m1AgeGender}\NormalTok{(}\AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded, }
+                                       \AttributeTok{var\_to\_explain =} \StringTok{"Cynicism"}\NormalTok{, }
+                                       \AttributeTok{explanatory\_vars =}
+                                         \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{                                           Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{                                             dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"Cynicism"}\NormalTok{, }\StringTok{"Age"}\NormalTok{, }\StringTok{"Gender"}\NormalTok{, }\StringTok{"Current\_track"}\NormalTok{))))}
+
+
+  
+
+
+
+
+\CommentTok{\# Multivarié m2 : ajusté pour bien{-}être \& burnout}
+\NormalTok{lm\_multivariateCY\_m2 }\OtherTok{\textless{}{-}}
+  \FunctionTok{multivariate\_lm\_analysis\_m2\_forcynism}\NormalTok{(}\AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded, }
+                                                        \AttributeTok{var\_to\_explain =} \StringTok{"Cynicism"}\NormalTok{, }
+                                                        \AttributeTok{explanatory\_vars =}
+                                                          \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{                                                            Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{                                                              dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"SCOFF\_total"}\NormalTok{, }\StringTok{"Academic\_Efficacy"}\NormalTok{,  }\StringTok{"Cynicism"}\NormalTok{,  }\StringTok{"Emotional\_Exhaustion"}\NormalTok{, }\StringTok{"Warwick\_Edinburg\_total"}\NormalTok{))))}
+
+\CommentTok{\# Tableau fusionné}
+\NormalTok{tbl\_CY\_merged }\OtherTok{\textless{}{-}}
+  \FunctionTok{tbl\_merge}\NormalTok{(}
+    \AttributeTok{tbls =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{      lm\_univariateCY,}
+\NormalTok{      lm\_multivariateCY\_m1,}
+\NormalTok{      lm\_multivariateCY\_m2}
+\NormalTok{    ),}
+    \AttributeTok{tab\_spanner =} \FunctionTok{c}\NormalTok{(}\StringTok{"**Univariate lm (Cynicism)**"}\NormalTok{,}
+                    \StringTok{"**Multivariate lm m1: + Age + Gender + Current\_track**"}\NormalTok{,}
+                    \StringTok{"**Multivariate lm m2: + Burnout + Well{-}being**"}\NormalTok{)}
+\NormalTok{  )}
+
+\NormalTok{tbl\_CY\_merged }\SpecialCharTok{\%\textgreater{}\%}  \FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  writexl}\SpecialCharTok{::}\FunctionTok{write\_xlsx}\NormalTok{(}\StringTok{"./Result/tbl\_cY\_MBISS\_merged.xlsx"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Transformation en numérique}
+\NormalTok{Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Academic\_Efficacy }\OtherTok{\textless{}{-}}
+  \FunctionTok{as.numeric}\NormalTok{(Reponse\_EBE\_P1\_for\_regression\_recoded}\SpecialCharTok{$}\NormalTok{Academic\_Efficacy)}
+
+\CommentTok{\# Analyse univariée}
+\NormalTok{lm\_univariate\_AE }\OtherTok{\textless{}{-}} \FunctionTok{univariate\_lm\_analysis}\NormalTok{(}
+  \AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded,}
+  \AttributeTok{var\_to\_explain =} \StringTok{"Academic\_Efficacy"}\NormalTok{,}
+  \AttributeTok{explanatory\_vars =} \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{    Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{      dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\StringTok{"Academic\_Efficacy"}\NormalTok{)}
+\NormalTok{  )}
+\NormalTok{)}
+
+\CommentTok{\# Multivariée m1}
+\NormalTok{lm\_multivariate\_AE\_m1 }\OtherTok{\textless{}{-}} \FunctionTok{multivariate\_lm\_analysis\_m1AgeGender}\NormalTok{(}
+  \AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded,}
+  \AttributeTok{var\_to\_explain =} \StringTok{"Academic\_Efficacy"}\NormalTok{,}
+  \AttributeTok{explanatory\_vars =} \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{    Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{      dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"Academic\_Efficacy"}\NormalTok{, }\StringTok{"Age"}\NormalTok{, }\StringTok{"Gender"}\NormalTok{, }\StringTok{"Current\_track"}\NormalTok{))}
+\NormalTok{  )}
+\NormalTok{)}
+
+\CommentTok{\# Multivariée m2}
+\NormalTok{lm\_multivariate\_AE\_m2 }\OtherTok{\textless{}{-}} \FunctionTok{multivariate\_lm\_analysis\_m2\_for\_Academic}\NormalTok{(}
+  \AttributeTok{data =}\NormalTok{ Reponse\_EBE\_P1\_for\_regression\_recoded,}
+  \AttributeTok{var\_to\_explain =} \StringTok{"Academic\_Efficacy"}\NormalTok{,}
+  \AttributeTok{explanatory\_vars =} \FunctionTok{colnames}\NormalTok{(}
+\NormalTok{    Reponse\_EBE\_P1\_for\_regression\_recoded }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{      dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\StringTok{"SCOFF\_total"}\NormalTok{, }\StringTok{"Academic\_Efficacy"}\NormalTok{, }
+                       \StringTok{"Cynicism"}\NormalTok{, }\StringTok{"Emotional\_Exhaustion"}\NormalTok{, }\StringTok{"Warwick\_Edinburg\_total"}\NormalTok{))}
+\NormalTok{  )}
+\NormalTok{)}
+
+\CommentTok{\# Fusion des tableaux}
+\NormalTok{tbl\_AE\_merged }\OtherTok{\textless{}{-}} \FunctionTok{tbl\_merge}\NormalTok{(}
+  \AttributeTok{tbls =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{    lm\_univariate\_AE,}
+\NormalTok{    lm\_multivariate\_AE\_m1,}
+\NormalTok{    lm\_multivariate\_AE\_m2}
+\NormalTok{  ),}
+  \AttributeTok{tab\_spanner =} \FunctionTok{c}\NormalTok{(}\StringTok{"**Univariate lm (Academic Efficacy from \textquotesingle{}French MBI{-}SS\textquotesingle{})**"}\NormalTok{,}
+                  \StringTok{"**Multivariate lm m1: + Age + Gender + Current\_track**"}\NormalTok{,}
+                  \StringTok{"**Multivariate lm m2: + Burnout + Wellbeing**"}\NormalTok{)}
+\NormalTok{)}
+
+\NormalTok{tbl\_AE\_merged  }\SpecialCharTok{\%\textgreater{}\%}  \FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  writexl}\SpecialCharTok{::}\FunctionTok{write\_xlsx}\NormalTok{(}\StringTok{"./Result/tbl\_AE\_MBISS\_merged.xlsx"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{sessionInfo}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## R version 4.3.3 (2024-02-29 ucrt)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 11 x64 (build 22631)
+## 
+## Matrix products: default
+## 
+## 
+## locale:
+## [1] LC_COLLATE=French_France.utf8  LC_CTYPE=French_France.utf8   
+## [3] LC_MONETARY=French_France.utf8 LC_NUMERIC=C                  
+## [5] LC_TIME=French_France.utf8    
+## 
+## time zone: Europe/Paris
+## tzcode source: internal
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] ordinal_2023.12-4.1 RColorBrewer_1.1-3  GGally_2.2.1       
+##  [4] ggtext_0.1.2        scales_1.3.0        broom_1.0.8        
+##  [7] UpSetR_1.4.0        ggforce_0.4.2       gtsummary_1.7.2    
+## [10] lubridate_1.9.3     forcats_1.0.0       stringr_1.5.1      
+## [13] dplyr_1.1.4         purrr_1.0.2         readr_2.1.5        
+## [16] tibble_3.2.1        ggplot2_3.5.1       tidyverse_2.0.0    
+## [19] tidyr_1.3.1         writexl_1.5.0       readxl_1.4.3       
+## 
+## loaded via a namespace (and not attached):
+##  [1] gtable_0.3.6         bayestestR_0.16.0    xfun_0.51           
+##  [4] insight_1.3.0        lattice_0.22-5       numDeriv_2016.8-1.1 
+##  [7] tzdb_0.4.0           vctrs_0.6.5          tools_4.3.3         
+## [10] generics_0.1.3       datawizard_1.1.0     ucminf_1.2.2        
+## [13] pkgconfig_2.0.3      Matrix_1.6-5         gt_0.10.1           
+## [16] lifecycle_1.0.4      compiler_4.3.3       farver_2.1.2        
+## [19] munsell_0.5.1        htmltools_0.5.8.1    yaml_2.3.10         
+## [22] pillar_1.10.1        MASS_7.3-60.0.1      broom.helpers_1.15.0
+## [25] nlme_3.1-164         ggstats_0.9.0        tidyselect_1.2.1    
+## [28] digest_0.6.35        stringi_1.8.3        labeling_0.4.3      
+## [31] labelled_2.12.0      polyclip_1.10-6      fastmap_1.1.1       
+## [34] grid_4.3.3           colorspace_2.1-0     cli_3.6.2           
+## [37] magrittr_2.0.3       withr_3.0.2          backports_1.5.0     
+## [40] timechange_0.3.0     rmarkdown_2.29       gridExtra_2.3       
+## [43] cellranger_1.1.0     hms_1.1.3            evaluate_1.0.3      
+## [46] haven_2.5.4          knitr_1.50           parameters_0.26.0   
+## [49] rlang_1.1.3          gridtext_0.1.5       Rcpp_1.0.12         
+## [52] glue_1.7.0           tweenr_2.0.3         xml2_1.3.6          
+## [55] effectsize_0.8.7     rstudioapi_0.16.0    R6_2.6.1            
+## [58] plyr_1.8.9
+\end{verbatim}
+
+\end{document}
