@@ -23,7 +23,7 @@ library(UpSetR)
 library(forcats)
 library(broom)
 
-library(scales)  # pour percent_format()
+library(scales)  #  percent_format()
 library(ggtext)
 library(GGally)
 
@@ -63,19 +63,19 @@ Recode_of_every_possible_answer <-
   readxl::read_excel("./Raw_data/Recode_of_every_possible_answer.xlsx")
 
 Reponse_EBE_P1_pre_filtered <-
-  readxl::read_excel("./Raw_data/Survey_result.xlsx")
+  readxl::read_excel("./Raw_data/Fake_Survey_FullyShuffled.xlsx")
 
 Reponse_EBE_P1 <- 
   Reponse_EBE_P1_pre_filtered[, (colnames(Reponse_EBE_P1_pre_filtered) %in% 
                                    Correspondance_EBEP1_2025$Nom)]
 
-# Créer un vecteur de correspondance entre les noms et les codes
+# Create a correspondence vector between names and codes
 correspondance <- setNames(Correspondance_EBEP1_2025$Code, Correspondance_EBEP1_2025$Nom)
 
-# Copier le dataframe d'origine
+# Copy the original dataframe
 Reponse_EBE_P1_recode <- Reponse_EBE_P1
 
-# Remplacer les noms de colonnes si correspondance trouvée
+# Replace column names if a match is found
 colnames(Reponse_EBE_P1_recode) <- ifelse(
   colnames(Reponse_EBE_P1_recode) %in% names(correspondance),
   correspondance[colnames(Reponse_EBE_P1_recode)],
@@ -83,14 +83,14 @@ colnames(Reponse_EBE_P1_recode) <- ifelse(
 )
 
 
-# Fonction de recodage d'une colonne
+# Recoding function for a column
 recode_2024 <- function(x) {
-  x <- as.character(x)  # au cas où ce serait numérique
+  x <- as.character(x)  # in case it's numeric
   x[x == "2024.0"] <- "2024"
   return(x)
 }
 
-# Appliquer à tout le dataframe (par exemple Reponse_EBE_P1)
+# Apply to the entire dataframe (e.g., Reponse_EBE_P1)
 Reponse_EBE_P1_recode <- as.data.frame(lapply(Reponse_EBE_P1_recode, recode_2024), stringsAsFactors = FALSE)
 
 # # Step 1: Get all unique answers from Reponse_EBE_P1
@@ -154,21 +154,21 @@ HAD_Reponse_EBE_P1_final_for_score <- HAD_Reponse_EBE_P1_final
 
 
 # Plot HAD ####
-# Récupérer les noms actuels des colonnes
+# Retrieve the current column names
 old_names <- colnames(HAD_Reponse_EBE_P1_final)
 
-# Créer un vecteur de nouveaux noms, en cherchant correspondance dans HAD_correspondance
+# Create a vector of new names, searching for matches in HAD_correspondance
 new_names <- sapply(old_names, function(x) {
   idx <- which(HAD_correspondance$Code == x)
   if(length(idx) == 1) {
     return(HAD_correspondance$Nom_anglais[idx])
   } else {
-    # Si pas de correspondance, on garde le nom original
+    # If there is no match, keep the original name.
     return(x)
   }
 })
 
-# Appliquer les nouveaux noms
+#Apply new names
 colnames(HAD_Reponse_EBE_P1_final) <- new_names
 
 
@@ -185,12 +185,12 @@ HAD_Reponse_EBE_P1_final_summary <- HAD_Reponse_EBE_P1_final_long %>%
     group_by(Question) %>%
     mutate(percent = n / sum(n))
   
-# Forcer l'ordre des modalités
+# Force the order of terms
 HAD_Reponse_EBE_P1_final_summary <- HAD_Reponse_EBE_P1_final_summary %>%
   mutate(Response = factor(Response, levels = c("3 Most of the time", "2 Often", "1 From time to time", "0 Never")))
 
 HAD_Reponse_EBE_P1_final_summary$Response %>% levels()
-# Calculer la somme de 0 et 1 par question pour mettre en gras si > 50%
+# Calculate the sum of 0 and 1 per question to bold if > 50%
 bold_questions <- HAD_Reponse_EBE_P1_final_summary %>%
   filter(Response %in% c("0 Never", "1 From time to time")) %>%
   group_by(Question) %>%
@@ -198,11 +198,11 @@ bold_questions <- HAD_Reponse_EBE_P1_final_summary %>%
   filter(sum_percent > 0.5) %>%
   pull(Question)
 
-# Ajouter une colonne pour label en gras ou non
+# Add a column for bold or non-bold labels
 HAD_Reponse_EBE_P1_final_summary <- HAD_Reponse_EBE_P1_final_summary %>%
   mutate(bold_label = ifelse(Question %in% bold_questions, TRUE, FALSE))
 
-# Préparer les labels pour afficher les % dans les barres (en % arrondi)
+# Prepare labels to display percentages in bars (rounded percentages)
 HAD_Reponse_EBE_P1_final_summary <- HAD_Reponse_EBE_P1_final_summary %>%
   mutate(percent_label = ifelse(percent > 0.02, paste0(round(percent*100), "%"), ""))  # n'affiche que si > 2%
 
@@ -235,30 +235,30 @@ ggplot(HAD_Reponse_EBE_P1_final_summary, aes(x = Question, y = percent, fill = R
 Due to a technical error, we cannot compute a score for HAD.
 
 ```{r calcul score Warwick Edinburg, fig.width=10, fig.height=10}
-# Filtrer la correspondance pour l'échelle Warwick-Edinburgh
+# Filter correspondence for Warwick-Edinburgh scale
 Warwick_correspondance <- Correspondance_EBEP1_2025 %>%
   filter(Echelle == "Warwick_Edinburgh")
 
-# Sélectionner uniquement les colonnes liées à Warwick dans les réponses
+# Select only columns related to Warwick in the responses
 WE_Reponse_EBE_P1_final <- Reponse_EBE_P1_final %>%
   select(contains("Warwick_Edinburgh"))
 
-
+# Clean and convert values to numeric for scoring
 WE_Reponse_EBE_P1_final_for_score <- WE_Reponse_EBE_P1_final %>%
   mutate(across(everything(), ~ {
-    # Retirer tous les caractères sauf chiffres, signes négatifs et points (virgules selon besoin)
+    # Remove all characters except digits, minus signs, and dots (commas if needed)
     cleaned <- str_replace_all(as.character(.), "[^0-9.-]", "")
-    # Convertir en numérique
+    # Convert to numeric
     as.numeric(cleaned)
   }))
 
-
+# Compute total score (row sums)
 WE_Reponse_EBE_P1_final_score <-
   WE_Reponse_EBE_P1_final_for_score %>% rowSums() %>% as.data.frame()
 
 colnames(WE_Reponse_EBE_P1_final_score) <- "Warwick_Edinburg_total"
 
-# Renommage des colonnes avec noms anglais (si disponibles)
+# Rename columns with English names (if available)
 old_names <- colnames(WE_Reponse_EBE_P1_final)
 
 new_names <- sapply(old_names, function(x) {
@@ -272,7 +272,7 @@ new_names <- sapply(old_names, function(x) {
 
 colnames(WE_Reponse_EBE_P1_final) <- new_names
 
-# Passage en format long
+# Reshape to long format
 WE_Reponse_EBE_P1_final_long <- WE_Reponse_EBE_P1_final %>%
   pivot_longer(
     cols = everything(),
@@ -280,31 +280,28 @@ WE_Reponse_EBE_P1_final_long <- WE_Reponse_EBE_P1_final %>%
     values_to = "Response"
   )
 
-# Résumé des réponses
+# Summarize responses
 WE_Reponse_EBE_P1_final_summary <- WE_Reponse_EBE_P1_final_long %>%
   group_by(Question, Response) %>%
   summarise(n = n(), .groups = "drop") %>%
   group_by(Question) %>%
   mutate(percent = n / sum(n))
 
-
-# Définir l’ordre des modalités de réponse typiques WEMWBS (à adapter selon ton codage réel)
-
-
+# Define response order for typical WEMWBS categories (adjust based on your actual coding)
 WE_Reponse_EBE_P1_final_summary <- WE_Reponse_EBE_P1_final_summary %>%
   mutate(Response = factor(Response,
                            levels = c("5 All the time", "4 Often", "3 Sometimes", "2 Rarely", "1 never")))
 
-
+# Add labels and highlight specific questions
 WE_Reponse_EBE_P1_final_summary <- WE_Reponse_EBE_P1_final_summary %>%
   mutate(bold_label = ifelse(Question %in% bold_questions, TRUE, FALSE),
          percent_label = ifelse(percent > 0.02, paste0(round(percent*100), "%"), ""))
 
-# Palette de couleurs pour WEMWBS
+# Color palette for WEMWBS
 my_palette_WE <- scales::gradient_n_pal(c("lightgreen", "mediumseagreen", "green", "seagreen", "darkgreen"))
 colors_WE <- my_palette_WE(seq(0, 1, length.out = 5))
 
-# Visualisation
+# Visualization
 WEMWBS_answer <-
   ggplot(WE_Reponse_EBE_P1_final_summary, aes(x = Question, y = percent, fill = Response)) +
   geom_bar(stat = "identity", position = "fill") +
@@ -324,82 +321,85 @@ WEMWBS_answer <-
 
 WEMWBS_answer
 
-
+# Prepare data for Cronbach’s alpha
 WE_Reponse_EBE_P1_final_foralpha_cronbach <- as.data.frame(
   lapply(WE_Reponse_EBE_P1_final, function(x) as.numeric(gsub("[^0-9]", "", x)))
 )
+
+# Reliability analysis (Cronbach’s alpha)
 alpha_result_WE <- psych::alpha(WE_Reponse_EBE_P1_final_foralpha_cronbach)
 alpha_result_WE$total
+
 ```
 
 
 
 ```{r calcul score SCOFF, fig.width=7, fig.height=4}
-# 1. Filtrer la correspondance SCOFF
+# 1. Filter correspondence for SCOFF
 SCOFF_correspondance <- Correspondance_EBEP1_2025 %>%
   filter(Echelle == "SCOFF")
 
-# 2. Sélectionner les colonnes SCOFF dans les réponses
+# 2. Select SCOFF columns in the responses
 SCOFF_Reponse_EBE_P1_final <- Reponse_EBE_P1_final %>%
   select(contains("SCOFF"))
 
-# 3. Nettoyage et transformation en score binaire (0/1)
+# 3. Clean and transform into binary score (0/1)
 SCOFF_Reponse_EBE_P1_final_for_score <- SCOFF_Reponse_EBE_P1_final %>%
   mutate(across(everything(), ~ case_when(
     str_to_lower(.) %in% c("yes", "oui") ~ 1,
     str_to_lower(.) %in% c("no", "non") ~ 0,
-    TRUE ~ NA_real_  # ou NA_integer_ si tu veux des entiers
+    TRUE ~ NA_real_  # or NA_integer_ if you want integers
   )))
 
-# 4. Calcul du score total par individu
+# 4. Calculate total score per individual
 SCOFF_Reponse_EBE_P1_final_score <- SCOFF_Reponse_EBE_P1_final_for_score %>%
   rowSums(na.rm = TRUE) %>%
   as.data.frame()
 colnames(SCOFF_Reponse_EBE_P1_final_score) <- "SCOFF_total"
 
-# 5. Application du cutoff clinique
+# 5. Apply clinical cutoff
 SCOFF_Reponse_EBE_P1_final_score <- SCOFF_Reponse_EBE_P1_final_score %>%
   mutate(SCOFF_sup_2_Eating_dirsorder_risk = ifelse(SCOFF_total >= 2, "Risk_SCOFF", "No_Risk"))
 
 # Barplot
 
-# Préparation du résumé SCOFF
+# Prepare SCOFF summary
 SCOFF_summary <- SCOFF_Reponse_EBE_P1_final_score %>%
   group_by(SCOFF_total) %>%
   summarise(n = n(), .groups = "drop") %>%
   mutate(percent = n / sum(n),
          SCOFF_total = factor(SCOFF_total, levels = sort(unique(SCOFF_total))),
-         SCOFF_num = as.numeric(as.character(SCOFF_total)) # Conversion en numérique
+         SCOFF_num = as.numeric(as.character(SCOFF_total)) # Convert to numeric
   ) %>%
   mutate(SCOFF_total = factor(SCOFF_total, levels = as.character(0:5)))
 
-# Calculer la hauteur cumulée au seuil SCOFF_num == 2
+# Compute cumulative height at cutoff SCOFF_num == 2
 cutoff_y <- sum(SCOFF_summary$percent[SCOFF_summary$SCOFF_num < 2])
 
 SCOFF_score_ditrib <-
   ggplot(SCOFF_summary, aes(x = 1, y = percent, fill = SCOFF_num)) +
   geom_bar(stat = "identity", width = 0.7, position = "stack") +
-geom_text(aes(label = paste0(sprintf("%.0f", percent * 100), "%")),
-          position = position_stack(vjust = 0.5),
-          color = "white", size = 5) + 
+  geom_text(aes(label = paste0(sprintf("%.0f", percent * 100), "%")),
+            position = position_stack(vjust = 0.5),
+            color = "white", size = 5) + 
   scale_fill_gradientn(
-    colors = c("#FFC0CB", "#DA70D6", "#8A2BE2"),  # dégradé rose -> violet
+    colors = c("#FFC0CB", "#DA70D6", "#8A2BE2"),  # gradient pink -> purple
     breaks = 0:5,
     labels = 0:5,
     limits = c(0,5),
     name = "SCOFF Total Score"
   ) +
-  # Ligne horizontale à la hauteur du cutoff
+  # Horizontal line at cutoff
   geom_hline(yintercept = cutoff_y, linetype = "dashed", color = "black", linewidth = 1) +
   
-  # Annotation "Not at risk" à gauche sous la ligne
+  # "Not at risk" annotation below the line
   annotate("text", x = 0.7, y = cutoff_y / 2, label = "Not at risk\n(49.51%)", angle = 0, size = 5, hjust = 1) +
   
-  # Annotation "At risk" à gauche au-dessus de la ligne
+  # "At risk" annotation above the line
   annotate("text", x = 0.7, y = cutoff_y + (1.25 - cutoff_y) / 2, label = "At risk of Eating Disorder\n      (50.49%)           ", angle = 0, size = 5, hjust = 1) +
   
   coord_flip() +
-    scale_y_continuous(labels = scales::percent_format(), expand = c(0, 0)) +
+  scale_y_continuous(labels = scales::percent_format(), expand = c(0, 0)) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_continuous(labels = scales::percent_format()) +
   labs(
@@ -415,23 +415,22 @@ geom_text(aes(label = paste0(sprintf("%.0f", percent * 100), "%")),
     legend.text = element_text(size = 11),
     axis.line = element_blank()
   ) 
-  
 
 SCOFF_score_ditrib
 
 ggsave("./Result/Figures/SCOFF.png", SCOFF_score_ditrib, width = 10, height = 6)
 
-
-
+# Reliability analysis (Cronbach’s alpha)
 alpha_result_SCOFF <- psych::alpha(SCOFF_Reponse_EBE_P1_final_for_score)
 alpha_result_SCOFF$total
+
 
 
 ```
   
 ```{r calcul score SCOFF PArt2, fig.width=8, fig.height=6}
 
-# 6. Renommage des colonnes avec noms anglais (si disponibles)
+# 6. Rename columns with English names (if available)
 old_names <- colnames(SCOFF_Reponse_EBE_P1_final)
 new_names <- sapply(old_names, function(x) {
   idx <- which(SCOFF_correspondance$Code == x)
@@ -443,7 +442,7 @@ new_names <- sapply(old_names, function(x) {
 })
 colnames(SCOFF_Reponse_EBE_P1_final) <- new_names
 
-# 7. Passage en format long
+# 7. Convert to long format
 SCOFF_Reponse_EBE_P1_final_long <- SCOFF_Reponse_EBE_P1_final %>%
   pivot_longer(
     cols = everything(),
@@ -451,22 +450,22 @@ SCOFF_Reponse_EBE_P1_final_long <- SCOFF_Reponse_EBE_P1_final %>%
     values_to = "Response"
   )
 
-# 8. Résumé des réponses
+# 8. Summarize responses
 SCOFF_Reponse_EBE_P1_final_summary <- SCOFF_Reponse_EBE_P1_final_long %>%
   group_by(Question, Response) %>%
   summarise(n = n(), .groups = "drop") %>%
   group_by(Question) %>%
   mutate(percent = n / sum(n))
 
-# 9. Forcer l’ordre (0 = non, 1 = oui)
+# 9. Force order (0 = No, 1 = Yes)
 SCOFF_Reponse_EBE_P1_final_summary <- SCOFF_Reponse_EBE_P1_final_summary %>%
   mutate(Response = factor(Response, levels = c("Yes", "No"), labels = c("Yes", "No")))
 
-# 10. Préparation des étiquettes
+# 10. Prepare labels
 SCOFF_Reponse_EBE_P1_final_summary <- SCOFF_Reponse_EBE_P1_final_summary %>%
   mutate(percent_label = ifelse(percent > 0.02, paste0(round(percent*100), "%"), ""))
 
-# 11. Palette et graphe
+# 11. Palette and plot
 colors_SCOFF <- c("darkred", "darkgreen")
 
 SCOFF_answer <-
@@ -488,15 +487,16 @@ SCOFF_answer <-
 
 SCOFF_answer
 
+
 ```
 
 
 ```{r calcul score French MBI SS, fig.width=8, fig.height=4}
-# Filtrer la correspondance pour MBI-SS
+# Filter correspondence for MBI-SS
 MBI_correspondance <- Correspondance_EBEP1_2025 %>%
   filter(Echelle == "French_MBI_SS")
 
-# Sélectionner uniquement les colonnes MBI dans les réponses
+# Select only MBI columns in the responses
 MBI_Reponse_EBE_P1_final <- Reponse_EBE_P1_final %>%
   select(contains("French_MBI_SS"))
 
@@ -506,6 +506,7 @@ MBI_Reponse_EBE_P1_final_for_score <- MBI_Reponse_EBE_P1_final %>%
     as.numeric(cleaned)
   }))
 
+# Remove "[MBI-SS]" from English names in the correspondence
 MBI_correspondance$Nom_anglais <- str_remove_all(MBI_correspondance$Nom_anglais, "\\[MBI-SS\\] ")
 
 
@@ -533,7 +534,7 @@ MBI_correspondance$Nom_anglais <- str_remove_all(MBI_correspondance$Nom_anglais,
 
 MBI_Reponse_EBE_P1_final_for_score <- MBI_Reponse_EBE_P1_final_for_score %>%
   mutate(
-    # Épuisement émotionnel : somme des 5 items
+    # Emotional Exhaustion: sum of 5 items
     Emotional_Exhaustion = rowSums(select(., 
                                           French_MBI_SS_emotionally_drained,
                                           French_MBI_SS_feeling_exhausted_day_end,
@@ -541,14 +542,14 @@ MBI_Reponse_EBE_P1_final_for_score <- MBI_Reponse_EBE_P1_final_for_score %>%
                                           French_MBI_SS_tired_morning_university,
                                           French_MBI_SS_studying_stressful), na.rm = TRUE),
     
-    # Cynisme : somme des 4 items
+    # Cynicism: sum of 4 items
     Cynicism = rowSums(select(., 
                               French_MBI_SS_less_interest_studies,
                               French_MBI_SS_less_enthusiastic_studies,
                               French_MBI_SS_more_cynical_about_studies,
                               French_MBI_SS_doubt_study_meaning), na.rm = TRUE),
     
-    # Efficacité académique : somme des 6 items
+    # Academic Efficacy: sum of 6 items
     Academic_Efficacy = rowSums(select(., 
                                        French_MBI_SS_problem_solving_effective,
                                        French_MBI_SS_effective_contribution,
@@ -557,8 +558,7 @@ MBI_Reponse_EBE_P1_final_for_score <- MBI_Reponse_EBE_P1_final_for_score %>%
                                        French_MBI_SS_feeling_energized_goals,
                                        French_MBI_SS_feeling_effective_in_class), na.rm = TRUE),
     
-    
-    # Classification de la sévérité
+    # Severity classification
     Emotional_Exhaustion_Level = case_when(
       Emotional_Exhaustion >= 5  & Emotional_Exhaustion <= 13 ~ "Low",
       Emotional_Exhaustion >= 14 & Emotional_Exhaustion <= 22 ~ "Moderate",
@@ -580,15 +580,16 @@ MBI_Reponse_EBE_P1_final_for_score <- MBI_Reponse_EBE_P1_final_for_score %>%
       TRUE ~ NA_character_
     )
   )
+
+# Select scores and items for final dataset
 MBI_Reponse_EBE_P1_final_score <-
   MBI_Reponse_EBE_P1_final_for_score %>%
   select(
-    # Scores globaux en premier
+    # Global scores first
     Emotional_Exhaustion,
     Emotional_Exhaustion_Level,
     
-    
-    # Items Épuisement Émotionnel
+    # Emotional Exhaustion items
     French_MBI_SS_emotionally_drained,
     French_MBI_SS_feeling_exhausted_day_end,
     French_MBI_SS_feeling_exhausted_studies,
@@ -597,7 +598,7 @@ MBI_Reponse_EBE_P1_final_score <-
     
     Cynicism,
     Cynicism_Level,
-    # Items Cynisme
+    # Cynicism items
     French_MBI_SS_less_interest_studies,
     French_MBI_SS_less_enthusiastic_studies,
     French_MBI_SS_more_cynical_about_studies,
@@ -605,21 +606,18 @@ MBI_Reponse_EBE_P1_final_score <-
     
     Academic_Efficacy,
     Academic_Efficacy_Level,
-    # Items Efficacité Académique
+    # Academic Efficacy items
     French_MBI_SS_problem_solving_effective,
     French_MBI_SS_effective_contribution,
     French_MBI_SS_consider_good_student,
     French_MBI_SS_learned_interesting_things,
     French_MBI_SS_feeling_energized_goals,
-    French_MBI_SS_feeling_effective_in_class,
-    
-    # Niveaux de sévérité
-    )
+    French_MBI_SS_feeling_effective_in_class
+  )
 
-# Plot Sévérité
+# Plot Severity Levels
 
-
-# Long format + regroupement pour les proportions
+# Long format + compute proportions
 MBI_levels_long <- MBI_Reponse_EBE_P1_final_score %>%
   select(contains("Level")) %>%
   pivot_longer(cols = everything(),
@@ -639,12 +637,13 @@ MBI_levels_long <- MBI_Reponse_EBE_P1_final_score %>%
     Severity_Level = factor(Severity_Level, levels = c("Low", "Moderate", "High")),
     Dimension = factor(Dimension, levels = c("Emotional Exhaustion", "Cynicism", "Academic Efficacy"))
   )
+
 MBI_levels_long$Severity_Level <- factor(
   MBI_levels_long$Severity_Level,
   levels = c("High", "Moderate", "Low")
 )
 
-
+# Plot stacked bar chart
 ggplot(MBI_levels_long, aes(x = Dimension, y = percent, fill = Severity_Level)) +
   geom_bar(stat = "identity", position = "stack", width = 0.7) +
   geom_text(aes(label = paste0(round(percent * 100), "%")),
@@ -656,7 +655,7 @@ ggplot(MBI_levels_long, aes(x = Dimension, y = percent, fill = Severity_Level)) 
     values = c(
       "Low" = "#91cf60",       # green
       "Moderate" = "#fdae61",  # orange
-      "High" = "#d73027"     # red
+      "High" = "#d73027"       # red
     ),
     name = "Level"
   ) +
@@ -667,10 +666,11 @@ ggplot(MBI_levels_long, aes(x = Dimension, y = percent, fill = Severity_Level)) 
   ) +
   my_theme
 
+
 ```
 
 ```{r calcul score French MBI SS Part2, fig.width=10, fig.height=10} 
-# Plot de tout  ####
+# Plot of everything  ####
 
 MBI_Reponse_EBE_P1_final_score_filtered <-
   MBI_Reponse_EBE_P1_final %>%
@@ -840,7 +840,7 @@ All_scores <-
        WE_Reponse_EBE_P1_final_score)
 
 
-# Calculer statistiques + nombre et % < 40
+# Calculate statistics + number and % < 40
 stats_WE <- All_scores %>%
   summarise(
     min = min(Warwick_Edinburg_total, na.rm = TRUE),
@@ -856,7 +856,7 @@ stats_WE <- All_scores %>%
     iqr = paste0("[", round(Q1, 2), "; ", round(Q3, 2), "]") 
     )
 
-# Construire le titre avec IQR
+# title with IQR
 title_text_WE <- paste0(
   "Min: ", stats_WE$min, " | Max: ", stats_WE$max, " | Median: ", round(stats_WE$median, 2), " | IQR: ", stats_WE$iqr,
   " \nMean: ", round(stats_WE$mean, 2), " | SD: ", round(stats_WE$sd, 2),
@@ -888,7 +888,7 @@ burnout_stats <- All_scores %>%
 
 burnout_stats
 
-# Calculer statistiques + nombre et % < 40
+# Calculate statistics + number and % < 40
 stats_EE <- All_scores %>%
   summarise(
     min = min(Emotional_Exhaustion, na.rm = TRUE),
@@ -915,7 +915,7 @@ EE_counts <- All_scores %>%
     label = paste0(Emotional_Exhaustion_Level, ": ", count, " (", percent, "%)")
   )
 
-# Construire le titre
+# Building the title
 title_text_EE <-  paste0(
   "Min: ", stats_EE$min, " | Max: ", stats_EE$max, " | Median: ", round(stats_EE$median, 2), " | IQR: ", stats_EE$iqr,
   " \nMean: ", round(stats_EE$mean, 2), " | SD: ", round(stats_EE$sd, 2)
@@ -954,7 +954,7 @@ stats_EE_plot <- All_scores %>%
   my_theme
 
 
-# Statistiques descriptives pour Cynicism
+# Descriptive statistics for Cynicism
 stats_CY <- All_scores %>%
   summarise(
     min = min(Cynicism, na.rm = TRUE),
@@ -968,7 +968,7 @@ stats_CY <- All_scores %>%
     iqr = paste0("[", round(Q1, 2), "; ", round(Q3, 2), "]") 
     ) 
 
-# Comptes + % par niveau Cynicism_Level (colonne déjà existante)
+# Counts + % per Cynicism_Level (existing column)
 CY_counts <- All_scores %>%
   filter(!is.na(Cynicism_Level)) %>%
   group_by(Cynicism_Level) %>%
@@ -979,13 +979,13 @@ CY_counts <- All_scores %>%
     label = paste0(Cynicism_Level, ": ", count, " (", percent, "%)")
   )
 
-# Construire le titre
+# Title
 title_text_CY <- paste0(
   "Min: ", stats_CY$min, " | Max: ", stats_CY$max, " | Median: ", round(stats_CY$median, 2), " | IQR: ", stats_CY$iqr,
   " \nMean: ", round(stats_CY$mean, 2), " | SD: ", round(stats_CY$sd, 2)
 )
 
-# Facteur avec labels custom (dans l’ordre Low, Moderate, High)
+# custom label
 levels_labels_CY <- CY_counts$label
 names(levels_labels_CY) <- CY_counts$Cynicism_Level
 
@@ -995,7 +995,7 @@ All_scores$Cynicism_Level <- factor(
   labels = c(levels_labels_CY["Low"], levels_labels_CY["Moderate"], levels_labels_CY["High"])
 )
 
-# Palette nuances de bleu (ou autre couleur si tu préfères)
+# Palette 
 blue_palette_named_CY <- setNames(
   c("#a8cfff", "#5390d9", "#08306b"),
   c(levels_labels_CY["Low"], levels_labels_CY["Moderate"], levels_labels_CY["High"])
@@ -1015,7 +1015,7 @@ stats_CY_plot <- All_scores %>%
   ) +
   my_theme
 
-# Statistiques descriptives Academic_Efficacy
+# Descriptive statistics Academic_Efficacy
 stats_AE <- All_scores %>%
   summarise(
     min = min(Academic_Efficacy, na.rm = TRUE),
@@ -1029,7 +1029,7 @@ stats_AE <- All_scores %>%
     iqr = paste0("[", round(Q1, 2), "; ", round(Q3, 2), "]") 
     ) 
 
-# Comptes + % par niveau Academic_Efficacy_Level (colonne déjà existante)
+# Counts + % per Academic_Efficacy_Level (existing column)
 AE_counts <- All_scores %>%
   filter(!is.na(Academic_Efficacy_Level)) %>%
   group_by(Academic_Efficacy_Level) %>%
@@ -1040,13 +1040,13 @@ AE_counts <- All_scores %>%
     label = paste0(Academic_Efficacy_Level, ": ", count, " (", percent, "%)")
   )
 
-# Construire le titre
+# Title
 title_text_AE <- paste0(
   "Min: ", stats_AE$min, " | Max: ", stats_AE$max, " | Median: ", round(stats_AE$median, 2), " | IQR: ", stats_AE$iqr,
   " \nMean: ", round(stats_AE$mean, 2), " | SD: ", round(stats_AE$sd, 2)
 )
 
-# Facteur avec labels custom (ordre Low, Moderate, High)
+# Factor with label custo
 levels_labels_AE <- AE_counts$label
 names(levels_labels_AE) <- AE_counts$Academic_Efficacy_Level
 
@@ -1143,15 +1143,15 @@ png("./Result/Figures/Fig2D.png", width = 1000, height = 1000, res = 120)
 corrplot(cor_matrix,
          type = "upper",
          method = "square",
-         addCoef.col = "black",  # coefficients en noir
-         tl.col = "black",       # texte des labels en noir
-         tl.srt = 45,            # rotation des labels
-         number.cex = 0.8,       # taille des coefficients
+         addCoef.col = "black",
+         tl.col = "black",       
+         tl.srt = 45,           
+         number.cex = 0.8,     
          diag = FALSE
 )
 
-# Ajouter les étoiles sur le graphique
-# Ajouter les étoiles sur le graphique, un peu plus haut et en gris
+# Add stars to the graph
+# Add stars to the graph, slightly higher up and in gray
 n <- ncol(cor_matrix)
 for (i in 1:(n-1)) {
   for (j in (i+1):n) {
@@ -1159,7 +1159,7 @@ for (i in 1:(n-1)) {
     if (star != "") {
       x_pos <- j
       y_pos <- n - i + 1
-      # Décalage vertical : +0.3 pour monter un peu
+      # Vertical offset: +0.3 to raise slightly
       text(x = x_pos, y = y_pos + 0.1, labels = star, col = "grey0", cex = 1.5, font = 2)
     }
   }
@@ -1200,7 +1200,7 @@ ggsave("./Result/Figures/FigS1.png", df_univ_plot, width = 9, height = 4.5)
 
 
 ```{r Score by university, fig.width=20, fig.height=12}
-# Préparer les données
+# Data preparation
 Score_and_univeristy <- Reponse_EBE_P1_final %>%
   dplyr::select("University") %>%
   cbind(All_scores) %>%
@@ -1277,28 +1277,27 @@ plots
 
 
 ```{r upset plot, fig.width=12, fig.height=7}
-
 make_upset_plot <- function(data, prefix, keep_order = FALSE) {
-  # 1. Sélectionner et recoder en binaire
+  # 1. Select columns and recode to binary
   df_binary <- data %>%
     select(contains(prefix)) %>%
     mutate(across(everything(), ~ ifelse(.x == "Yes", 1,
                                          ifelse(.x == "No", 0, NA)))) %>%
     filter(if_all(everything(), ~ !is.na(.)))
   
-  # 2. Renommer les colonnes en retirant le préfixe
+  # 2. Rename columns by removing the prefix
   colnames(df_binary) <- str_remove(colnames(df_binary), prefix)
   
-  # 3. Calculer le nombre de "Yes" et trier les colonnes
+  # 3. Count number of "Yes" and sort columns
   yes_counts <- colSums(df_binary)
   ordered_columns <- names(sort(yes_counts, decreasing = TRUE))
   df_binary <- df_binary[, ordered_columns]
   
-  # 4. Ajouter "(n = X)" aux noms de colonnes
+  # 4. Add "(n = X)" to column names
   new_colnames <- paste0(ordered_columns, " (n = ", yes_counts[ordered_columns], ")")
   colnames(df_binary) <- new_colnames
   
-  # 5. Afficher le plot UpSet
+  # 5. Display the UpSet plot
   upset(
     df_binary,
     sets = new_colnames,
@@ -1307,15 +1306,18 @@ make_upset_plot <- function(data, prefix, keep_order = FALSE) {
   )
 }
 
+# Example calls
 make_upset_plot(Reponse_EBE_P1_final, "HighSchool_Last_Year_specialty_", keep_order = TRUE)
 make_upset_plot(Reponse_EBE_P1_final, "HighSchool_SecondLast_Year_specialty_", keep_order = TRUE)
 
+# Single-variable Baccalaureate field distribution
 bacc_single <- Reponse_EBE_P1_final %>%
   filter(!is.na(Baccalaureate_Field)) %>%
   count(Baccalaureate_Field) %>%
   mutate(freq = n / sum(n) * 100)
 
-my_colors <- brewer.pal(4, "Set2")  # soft pastel colors, great for 4 categories
+# Color palette (soft pastel colors for 4 categories)
+my_colors <- brewer.pal(4, "Set2")
 
 ```
 
@@ -1753,7 +1755,8 @@ Reponse_EBE_P1_for_regression$SCOFF_total <- as.factor(Reponse_EBE_P1_for_regres
 translation_map <- setNames(Recode_of_every_possible_answer$translation_num,
                             Recode_of_every_possible_answer$translation)
 
-# Fonction de recodage qui garde les valeurs non trouvées
+# Recoding function that keeps values not found
+
 safe_recode <- function(x, map) {
   recoded <- map[as.character(x)]
   ifelse(is.na(recoded), x, recoded)
@@ -1761,7 +1764,7 @@ safe_recode <- function(x, map) {
 
 
 
-# Application sur tout le dataframe
+# Apply to the entire dataframe
 Reponse_EBE_P1_for_regression_recoded <- Reponse_EBE_P1_for_regression %>%
   mutate(across(everything(), ~ safe_recode(., translation_map)))
 Reponse_EBE_P1_for_regression_recoded$SCOFF_total <-

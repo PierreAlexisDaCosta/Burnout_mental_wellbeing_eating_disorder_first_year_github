@@ -1,11 +1,11 @@
 
 df <-
-  readxl::read_excel("./Raw_data/TrueSurvey_result.xlsx")
+  readxl::read_excel("./Raw_data/Survey_result.xlsx")
 
 fake_df <- as.data.frame(lapply(df, sample))
 
+colnames(fake_df) <-
+  colnames(df)
 
-View(fake_df)
 library(writexl)
-write_xlsx(fake_df, "Fake_Survey_FullyShuffled.xlsx")
-View(fake_df)
+writexl::write_xlsx(fake_df, "Fake_Survey_FullyShuffled.xlsx")
